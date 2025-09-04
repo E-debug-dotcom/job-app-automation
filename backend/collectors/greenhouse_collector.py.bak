@@ -1,0 +1,135 @@
+#!/usr/bin/env python3
+"""
+greenhouse_collector.py
+Fetch public Greenhouse job feeds and insert new jobs into jobs.db
+Usage:
+    python greenhouse_collector.py --companies ../../config/companies.json
+"""
+import sqlite3
+import requests
+import json
+import time
+import hashlib
+import argparse
+from datetime import datetime
+from pathlib import Path
+
+DB_PATH = str(Path(__file__).resolve().parents[2] / "db" / "jobs.db")  # repo_root/db/jobs.db
+SOURCE = "greenhouse"
+HEADERS = {"User-Agent": "job-app-automation/1.0 (you@example.com)"}
+RATE_LIMIT_SECONDS = 1.0
+
+GH_ENDPOINTS = [
+    "https://boards.greenhouse.io/{company}/v1/jobs",
+    "https://boards-api.greenhouse.io/v1/boards/{company}/jobs"
+]
+
+def sha256_hash(s: str) -> str:
+    return hashlib.sha256(s.encode("utf-8")).hexdigest()
+
+def fetch_json(url: str, timeout=15):
+    resp = requests.get(url, headers=HEADERS, timeout=timeout)
+    resp.raise_for_status()
+    return resp.json()
+
+def normalize_greenhouse_item(item):
+    job_id = str(item.get("id") or item.get("internal_job_id") or "")
+    title = item.get("title") or item.get("name") or ""
+    location = ""
+    if isinstance(item.get("locations"), list) and item.get("locations"):
+        location = ", ".join([loc.get("name","") for loc in item.get("locations") if loc.get("name")])
+    elif item.get("location"):
+        location = item.get("location")
+    url = item.get("absolute_url") or item.get("absolute_url") or item.get("url") or ""
+    date_posted = item.get("created_at") or item.get("updated_at") or ""
+    return {
+        "external_id": job_id,
+        "title": title.strip(),
+        "location": location.strip(),
+        "url": url,
+        "date_posted": date_posted
+    }
+
+def insert_job_if_new(conn, company, job_record):
+    cursor = conn.cursor()
+    key = job_record.get("external_id") or job_record.get("url") or (job_record.get("title") + job_record.get("location"))
+    job_hash = sha256_hash(key)
+    cursor.execute("SELECT id FROM applications WHERE job_hash = ?", (job_hash,))
+    if cursor.fetchone():
+        return False
+    now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    cursor.execute("""
+        INSERT INTO applications
+        (external_id, company, title, location, url, source, date_posted, date_scraped, job_hash)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        job_record.get("external_id"),
+        company,
+        job_record.get("title"),
+        job_record.get("location"),
+        job_record.get("url"),
+        SOURCE,
+        job_record.get("date_posted"),
+        now,
+        job_hash
+    ))
+    conn.commit()
+    return True
+
+def try_company_handle(conn, handle):
+    added = 0
+    for pattern in GH_ENDPOINTS:
+        url = pattern.format(company=handle)
+        try:
+            data = fetch_json(url)
+            jobs = data if isinstance(data, list) else data.get("jobs") or data.get("data") or []
+            for item in jobs:
+                rec = normalize_greenhouse_item(item)
+                if insert_job_if_new(conn, handle, rec):
+                    added += 1
+            return added
+        except requests.HTTPError:
+            continue
+        except Exception as e:
+            print(f"[ERROR] {handle} => {e}")
+            return added
+    return added
+
+def try_full_api_url(conn, url):
+    added = 0
+    try:
+        data = fetch_json(url)
+        jobs = data if isinstance(data, list) else data.get("jobs") or data.get("data") or []
+        for item in jobs:
+            rec = normalize_greenhouse_item(item)
+            if insert_job_if_new(conn, "greenhouse_direct", rec):
+                added += 1
+    except Exception as e:
+        print(f"[ERROR] fetch direct URL {url}: {e}")
+    return added
+
+def main(companies_file):
+    with open(companies_file, "r", encoding="utf8") as fh:
+        companies = json.load(fh)
+    conn = sqlite3.connect(DB_PATH)
+    total_added = 0
+    for entry in companies:
+        handle = entry if isinstance(entry, str) else entry.get("handle")
+        api_url = entry.get("api") if isinstance(entry, dict) else None
+        print(f"[INFO] scanning {handle or api_url}")
+        added = 0
+        if api_url:
+            added = try_full_api_url(conn, api_url)
+        else:
+            added = try_company_handle(conn, handle)
+        print(f"[INFO] added {added} jobs for {handle or api_url}")
+        total_added += added
+        time.sleep(RATE_LIMIT_SECONDS)
+    conn.close()
+    print(f"[DONE] total added: {total_added}")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--companies", default="../../config/companies.json", help="Path to companies.json")
+    args = parser.parse_args()
+    main(args.companies)
