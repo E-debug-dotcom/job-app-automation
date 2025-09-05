@@ -1,124 +1,360 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Job Board</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        select, table {
-            margin-top: 10px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Job Board</title>
+<style>
+  :root {
+    --filter-width: 250px; /* lock both filters to 250px */
+  }
+
+  body { font-family: Arial, sans-serif; margin: 20px; background: #f8fafc; color: #1e293b; }
+  h1 { text-align: center; margin-bottom: 30px; color: #334155; }
+
+  .filters {
+    display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px;
+    position: relative; /* containment for the custom dropdown menu */
+  }
+
+  /* Company (native select) */
+  .filters select {
+    width: var(--filter-width);
+    min-width: var(--filter-width);
+    max-width: var(--filter-width);
+    box-sizing: border-box;
+    padding: 8px 10px; font-size: 16px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;
+    transition: all 0.2s ease-in-out; background: white;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .filters select:focus { border-color: #6366f1; box-shadow: 0 0 5px rgba(99,102,241,0.3); }
+
+  .filters button {
+    padding: 8px 12px; font-size: 16px; cursor: pointer; border: none; border-radius: 6px; background-color: #6366f1; color: white;
+    transition: background 0.2s ease-in-out;
+  }
+  .filters button:hover { background-color: #4f46e5; }
+
+  /* Custom dropdown (Location) */
+  .custom-select {
+    width: var(--filter-width);
+    position: relative;
+    font-size: 16px;
+  }
+  .custom-select__button {
+    width: 100%;
+    text-align: left;
+    padding: 8px 34px 8px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #fff;
+    color: #1e293b;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    position: relative;
+  }
+  .custom-select__button:focus {
+    border-color: #6366f1; box-shadow: 0 0 5px rgba(99,102,241,0.3);
+  }
+  .custom-select__chevron {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    pointer-events: none; color: #475569;
+  }
+  .custom-select__menu {
+    position: absolute; left: 0; top: calc(100% + 4px);
+    width: 100%; /* always 250px */
+    max-height: 260px; overflow: auto;
+    background: #fff; border: 1px solid #cbd5e1; border-radius: 6px;
+    box-shadow: 0 8px 20px rgba(2,6,23,0.15);
+    display: none; z-index: 1000;
+  }
+  .custom-select.open .custom-select__menu { display: block; }
+
+  .custom-select__option {
+    padding: 8px 10px; cursor: pointer; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;
+  }
+  .custom-select__option:hover,
+  .custom-select__option[aria-selected="true"] {
+    background-color: #e0e7ff;
+  }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; border-radius: 6px; overflow: hidden; }
+  th, td { border-bottom: 1px solid #e2e8f0; padding: 12px 10px; text-align: left; }
+  th { background-color: #f1f5f9; color: #334155; font-weight: 600; }
+  tbody tr { transition: background 0.3s, transform 0.3s; }
+  tbody tr:hover { background-color: #e0e7ff; transform: translateY(-2px); }
+
+  a { color: #4f46e5; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Small utility for visually-hidden native select (keeps existing logic intact) */
+  .visually-hidden {
+    position: absolute !important;
+    height: 1px; width: 1px;
+    overflow: hidden; clip: rect(1px, 1px, 1px, 1px);
+    white-space: nowrap; clip-path: inset(50%);
+    border: 0; padding: 0; margin: -1px;
+  }
+</style>
 </head>
 <body>
-    <h1>Job Board</h1>
 
-    <label for="companyFilter">Company:</label>
-    <select id="companyFilter">
-        <option value="">All</option>
-    </select>
+<h1>Job Board</h1>
 
-    <label for="locationFilter">Location:</label>
-    <select id="locationFilter">
-        <option value="">All</option>
-    </select>
+<div class="filters">
+  <!-- Company: keep native select -->
+  <select id="companyFilter">
+    <option value="">All Companies</option>
+  </select>
+  <button id="clearCompany">Clear</button>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Company</th>
-                <th>Location</th>
-                <th>Title</th>
-                <th>Link</th>
-            </tr>
-        </thead>
-        <tbody id="jobsTable">
-        </tbody>
-    </table>
+  <!-- Location: keep a hidden native select for change events + custom dropdown UI -->
+  <select id="locationFilter" class="visually-hidden" aria-hidden="true" tabindex="-1">
+    <option value="">All Locations</option>
+  </select>
 
-    <script>
-        let jobsData = [];
+  <div id="locationCustom" class="custom-select" data-target="locationFilter">
+    <button type="button" class="custom-select__button" aria-haspopup="listbox" aria-expanded="false" aria-controls="locationMenu">
+      All Locations
+      <span class="custom-select__chevron">▾</span>
+    </button>
+    <ul id="locationMenu" class="custom-select__menu" role="listbox"></ul>
+  </div>
 
-        // Fetch companies and populate dropdown
-        fetch('/companies')
-            .then(res => res.json())
-            .then(companies => {
-                const companySelect = document.getElementById('companyFilter');
-                companies.forEach(c => {
-                    const opt = document.createElement('option');
-                    opt.value = c;
-                    opt.textContent = c;
-                    companySelect.appendChild(opt);
-                });
-            });
+  <button id="clearLocation">Clear</button>
+</div>
 
-        // Fetch locations and populate dropdown
-        fetch('/locations')
-            .then(res => res.json())
-            .then(locations => {
-                const locationSelect = document.getElementById('locationFilter');
-                locations.forEach(l => {
-                    const opt = document.createElement('option');
-                    opt.value = l;
-                    opt.textContent = l;
-                    locationSelect.appendChild(opt);
-                });
-            });
+<table id="jobsTable">
+  <thead>
+    <tr>
+      <th>Company</th>
+      <th>Location</th>
+      <th>Title</th>
+      <th>Apply</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Jobs will be populated here -->
+  </tbody>
+</table>
 
-        // Fetch jobs
-        function fetchJobs() {
-            fetch('/jobs')
-                .then(res => res.json())
-                .then(jobs => {
-                    jobsData = jobs;
-                    renderJobs();
-                });
+<script>
+let jobsData = [];
+
+// Utility: close any open custom select when clicking outside
+document.addEventListener('click', (e) => {
+  const openSelect = document.querySelector('.custom-select.open');
+  if (!openSelect) return;
+  if (!openSelect.contains(e.target)) {
+    toggleCustomSelect(openSelect, false);
+  }
+});
+
+function toggleCustomSelect(wrapper, open) {
+  const btn = wrapper.querySelector('.custom-select__button');
+  const menu = wrapper.querySelector('.custom-select__menu');
+  const nowOpen = (typeof open === 'boolean') ? open : !wrapper.classList.contains('open');
+
+  if (nowOpen) {
+    wrapper.classList.add('open');
+    btn.setAttribute('aria-expanded', 'true');
+    // Ensure menu width = wrapper (250px)
+    menu.style.width = wrapper.clientWidth + 'px';
+  } else {
+    wrapper.classList.remove('open');
+    btn.setAttribute('aria-expanded', 'false');
+  }
+}
+
+// Build custom dropdown options for Location
+function buildLocationDropdown(locations) {
+  const hiddenSelect = document.getElementById('locationFilter');
+  const wrapper = document.getElementById('locationCustom');
+  const button = wrapper.querySelector('.custom-select__button');
+  const menu = wrapper.querySelector('.custom-select__menu');
+
+  // Clear previous
+  hiddenSelect.innerHTML = '';
+  menu.innerHTML = '';
+
+  // Add "All Locations"
+  const defaultOpt = document.createElement('option');
+  defaultOpt.value = '';
+  defaultOpt.textContent = 'All Locations';
+  hiddenSelect.appendChild(defaultOpt);
+
+  // Populate both hidden select and custom menu
+  const allValues = [''].concat(locations);
+
+  allValues.forEach((value, idx) => {
+    // Hidden select option
+    if (idx > 0) { // skip empty (already added)
+      const opt = document.createElement('option');
+      opt.value = value;
+      opt.textContent = value;
+      hiddenSelect.appendChild(opt);
+    }
+
+    // Custom option
+    const li = document.createElement('li');
+    li.className = 'custom-select__option';
+    li.setAttribute('role', 'option');
+    li.setAttribute('data-value', value);
+    li.textContent = value || 'All Locations';
+    if (idx === 0) li.setAttribute('aria-selected', 'true');
+    menu.appendChild(li);
+  });
+
+  // Toggle open/close
+  button.addEventListener('click', () => {
+    toggleCustomSelect(wrapper);
+  });
+
+  // Option selection
+  menu.addEventListener('click', (e) => {
+    const item = e.target.closest('.custom-select__option');
+    if (!item) return;
+    const val = item.getAttribute('data-value') || '';
+    // Update visual selection
+    menu.querySelectorAll('.custom-select__option[aria-selected="true"]').forEach(n => n.removeAttribute('aria-selected'));
+    item.setAttribute('aria-selected', 'true');
+    // Update button label
+    button.firstChild.nodeValue = (val || 'All Locations') + ' ';
+    // Sync hidden select + fire change
+    hiddenSelect.value = val;
+    hiddenSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    // Close menu
+    toggleCustomSelect(wrapper, false);
+  });
+
+  // Basic keyboard support
+  wrapper.addEventListener('keydown', (e) => {
+    const options = Array.from(menu.querySelectorAll('.custom-select__option'));
+    const currentIdx = options.findIndex(o => o.getAttribute('aria-selected') === 'true');
+
+    switch (e.key) {
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        if (!wrapper.classList.contains('open')) {
+          toggleCustomSelect(wrapper, true);
+        } else if (currentIdx > -1) {
+          options[currentIdx].click();
         }
-
-        function renderJobs() {
-            const tbody = document.getElementById('jobsTable');
-            tbody.innerHTML = '';
-
-            const companyFilter = document.getElementById('companyFilter').value;
-            const locationFilter = document.getElementById('locationFilter').value;
-
-            const filteredJobs = jobsData.filter(job => {
-                return (!companyFilter || job.company === companyFilter) &&
-                       (!locationFilter || job.location === locationFilter);
-            });
-
-            filteredJobs.forEach(job => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${job.company}</td>
-                    <td>${job.location}</td>
-                    <td>${job.title}</td>
-                    <td><a href="${job.url}" target="_blank">Apply</a></td>
-                `;
-                tbody.appendChild(tr);
-            });
+        break;
+      case 'ArrowDown':
+        e.preventDefault();
+        if (!wrapper.classList.contains('open')) {
+          toggleCustomSelect(wrapper, true);
+          return;
         }
+        if (currentIdx < options.length - 1) {
+          options[currentIdx].removeAttribute('aria-selected');
+          options[currentIdx + 1].setAttribute('aria-selected', 'true');
+          options[currentIdx + 1].scrollIntoView({ block: 'nearest' });
+        }
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        if (!wrapper.classList.contains('open')) {
+          toggleCustomSelect(wrapper, true);
+          return;
+        }
+        if (currentIdx > 0) {
+          options[currentIdx].removeAttribute('aria-selected');
+          options[currentIdx - 1].setAttribute('aria-selected', 'true');
+          options[currentIdx - 1].scrollIntoView({ block: 'nearest' });
+        }
+        break;
+      case 'Escape':
+        if (wrapper.classList.contains('open')) {
+          toggleCustomSelect(wrapper, false);
+        }
+        break;
+      default:
+        break;
+    }
+  });
+}
 
-        document.getElementById('companyFilter').addEventListener('change', renderJobs);
-        document.getElementById('locationFilter').addEventListener('change', renderJobs);
+// Fetch jobs, companies, locations
+async function fetchData() {
+  const [jobsRes, companiesRes, locationsRes] = await Promise.all([
+    fetch('/jobs'), fetch('/companies'), fetch('/locations')
+  ]);
+  jobsData = await jobsRes.json();
+  const companies = await companiesRes.json();
+  const locations = await locationsRes.json();
 
-        fetchJobs();
-    </script>
+  // Populate company dropdown (native)
+  const companySelect = document.getElementById('companyFilter');
+  companies.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c; opt.textContent = c;
+    companySelect.appendChild(opt);
+  });
+
+  // Build custom dropdown for locations (with hidden native select for logic)
+  buildLocationDropdown(locations);
+
+  renderJobs();
+}
+
+// Render jobs table based on filters
+function renderJobs() {
+  const company = document.getElementById('companyFilter').value.toLowerCase();
+  const location = document.getElementById('locationFilter').value.toLowerCase(); // from hidden select
+  const tbody = document.getElementById('jobsTable').querySelector('tbody');
+  tbody.innerHTML = '';
+
+  const filtered = jobsData.filter(job => {
+    const matchCompany = !company || (job.company && job.company.toLowerCase() === company);
+    const matchLocation = !location || (job.location && job.location.toLowerCase() === location);
+    return matchCompany && matchLocation;
+  });
+
+  filtered.forEach((job, index) => {
+    const tr = document.createElement('tr');
+    tr.style.opacity = 0;
+    tr.innerHTML = `
+      <td>${job.company ?? ''}</td>
+      <td>${job.location ?? ''}</td>
+      <td>${job.title ?? ''}</td>
+      <td><a href="${job.url ?? '#'}>
+    `;
+    document.querySelector('#jobsTable tbody').appendChild(tr);
+    // Animate row appearance
+    setTimeout(() => { tr.style.opacity = 1; }, index * 50);
+  });
+}
+
+// Event listeners for filters
+document.getElementById('companyFilter').addEventListener('change', renderJobs);
+document.getElementById('locationFilter').addEventListener('change', renderJobs); // hidden select still triggers
+
+// Clear buttons
+document.getElementById('clearCompany').addEventListener('click', () => {
+  document.getElementById('companyFilter').value = '';
+  renderJobs();
+});
+document.getElementById('clearLocation').addEventListener('click', () => {
+  // Reset hidden select
+  const hiddenSelect = document.getElementById('locationFilter');
+  hiddenSelect.value = '';
+  hiddenSelect.dispatchEvent(new Event('change', { bubbles: true }));
+  // Reset custom UI label & selection
+  const wrapper = document.getElementById('locationCustom');
+  wrapper.querySelector('.custom-select__button').firstChild.nodeValue = 'All Locations ';
+  wrapper.querySelectorAll('.custom-select__option[aria-selected="true"]').forEach(n => n.removeAttribute('aria-selected'));
+  const first = wrapper.querySelector('.custom-select__option');
+  if (first) first.setAttribute('aria-selected', 'true');
+});
+
+// Initialize
+fetchData();
+</script>
+
 </body>
 </html>
