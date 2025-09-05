@@ -30,78 +30,246 @@
     "handle": "unity3d"
   },
   {
-    "handle": "roblox"
-  },
-  {
     "handle": "reddit"
-  },
-  {
-    "handle": "figma"
   },
   {
     "handle": "airbnb"
   },
   {
-    "handle": "lyft"
-  },
-  {
     "handle": "instacart"
   },
   {
-    "handle": "block"
+    "handle": "hubspotjobs"
   },
   {
-    "handle": "affirm"
+    "handle": "hubspot"
   },
   {
-    "handle": "discord"
+    "handle": "foursquare26"
   },
   {
-    "handle": "brex"
+    "handle": "remotecom"
   },
   {
-    "handle": "gusto"
+    "handle": "toast"
   },
   {
-    "handle": "elastic"
+    "handle": "carta"
   },
   {
-    "handle": "hashicorp"
+    "handle": "clutch"
+  },
+  {
+    "handle": "robinhood"
+  },
+  {
+    "handle": "faire"
+  },
+  {
+    "handle": "inmarket"
+  },
+  {
+    "handle": "quinstreet"
+  },
+  {
+    "handle": "checkr"
+  },
+  {
+    "handle": "bitwarden"
+  },
+  {
+    "handle": "snapdocs"
+  },
+  {
+    "handle": "snapmobileinc"
+  },
+  {
+    "handle": "greenhouse"
+  },
+  {
+    "handle": "correlationone"
+  },
+  {
+    "handle": "exoduspoint"
+  },
+  {
+    "handle": "exadelinc"
+  },
+  {
+    "handle": "goodjobgames"
+  },
+  {
+    "handle": "cannondesign"
+  },
+  {
+    "handle": "dydx"
+  },
+  {
+    "handle": "truebill"
+  },
+  {
+    "handle": "zenoti"
+  },
+  {
+    "handle": "squarespace"
+  },
+  {
+    "handle": "vimeo"
+  },
+  {
+    "handle": "wayfair"
+  },
+  {
+    "handle": "pinterest"
+  },
+  {
+    "handle": "pinterestjobadvertisements"
+  },
+  {
+    "handle": "warbyparker"
+  },
+  {
+    "handle": "betterment"
+  },
+  {
+    "handle": "tripadvisor"
+  },
+  {
+    "handle": "godaddy"
+  },
+  {
+    "handle": "lyft"
+  },
+  {
+    "handle": "stripes"
+  },
+  {
+    "handle": "lyft_media"
+  },
+  {
+    "handle": "squarepointcapital"
+  },
+  {
+    "handle": "appspace"
+  },
+  {
+    "handle": "wpp"
+  },
+  {
+    "handle": "mochihealth"
+  },
+  {
+    "handle": "abnormalsecurity"
+  },
+  {
+    "handle": "figma"
+  },
+  {
+    "handle": "tide"
+  },
+  {
+    "handle": "guidepointsecurity"
+  },
+  {
+    "handle": "xai"
+  },
+  {
+    "handle": "cdpjobs"
   },
   {
     "handle": "databricks"
   },
   {
-    "handle": "pilot"
+    "handle": "zoominfo"
   },
   {
-    "handle": "plaid"
+    "handle": "gleanwork"
+  },
+  {
+    "handle": "alarmcom"
+  },
+  {
+    "handle": "epirus"
+  },
+  {
+    "handle": "labelbox"
+  },
+  {
+    "handle": "projectdiscoveryinc"
+  },
+  {
+    "handle": "lokainc"
+  },
+  {
+    "handle": "natera"
+  },
+  {
+    "handle": "capco"
+  },
+  {
+    "handle": "trace3"
+  },
+  {
+    "handle": "softermii"
+  },
+  {
+    "handle": "distantjob"
+  },
+  {
+    "handle": "mutiny"
+  },
+  {
+    "handle": "boxinc"
+  },
+  {
+    "handle": "thousandeyes"
+  },
+  {
+    "handle": "brex"
+  },
+  {
+    "handle": "spacex"
+  },
+  {
+    "handle": "harmonic"
+  },
+  {
+    "handle": "ocrolusinc"
   },
   {
     "handle": "notion"
   },
   {
-    "handle": "confluent"
+    "handle": "peloton"
   },
   {
-    "handle": "zapier"
+    "handle": "duolingo"
   },
   {
-    "handle": "doordash"
+    "handle": "fanduel"
   },
   {
-    "handle": "digitalocean"
+    "handle": "digitalocean98"
   },
   {
-    "handle": "nvidia"
+    "handle": "housecall"
   },
   {
-    "handle": "snowflake"
+    "handle": "companycam"
   },
   {
-    "handle": "atlassian"
+    "handle": "theeverycompany"
   },
   {
-    "handle": "calm"
+    "handle": "github"
+  },
+  {
+    "handle": "classdojo"
+  },
+  {
+    "handle": "eucalyptus"
+  },
+  {
+    "handle": "fetchrewards"
   }
 ]

@@ -1,0 +1,107 @@
+[
+  {
+    "handle": "okta"
+  },
+  {
+    "handle": "dropbox"
+  },
+  {
+    "handle": "twilio"
+  },
+  {
+    "handle": "stripe"
+  },
+  {
+    "handle": "datadog"
+  },
+  {
+    "handle": "mongodb"
+  },
+  {
+    "handle": "cloudflare"
+  },
+  {
+    "handle": "asana"
+  },
+  {
+    "handle": "coinbase"
+  },
+  {
+    "handle": "unity3d"
+  },
+  {
+    "handle": "roblox"
+  },
+  {
+    "handle": "reddit"
+  },
+  {
+    "handle": "figma"
+  },
+  {
+    "handle": "airbnb"
+  },
+  {
+    "handle": "lyft"
+  },
+  {
+    "handle": "instacart"
+  },
+  {
+    "handle": "block"
+  },
+  {
+    "handle": "affirm"
+  },
+  {
+    "handle": "discord"
+  },
+  {
+    "handle": "brex"
+  },
+  {
+    "handle": "gusto"
+  },
+  {
+    "handle": "elastic"
+  },
+  {
+    "handle": "hashicorp"
+  },
+  {
+    "handle": "databricks"
+  },
+  {
+    "handle": "pilot"
+  },
+  {
+    "handle": "plaid"
+  },
+  {
+    "handle": "notion"
+  },
+  {
+    "handle": "confluent"
+  },
+  {
+    "handle": "zapier"
+  },
+  {
+    "handle": "doordash"
+  },
+  {
+    "handle": "digitalocean"
+  },
+  {
+    "handle": "nvidia"
+  },
+  {
+    "handle": "snowflake"
+  },
+  {
+    "handle": "atlassian"
+  },
+  {
+    "handle": "calm"
+  }
+]
