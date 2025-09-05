@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Job Board</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        select, table {
+            margin-top: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Job Board</h1>
+
+    <label for="companyFilter">Company:</label>
+    <select id="companyFilter">
+        <option value="">All</option>
+    </select>
+
+    <label for="locationFilter">Location:</label>
+    <select id="locationFilter">
+        <option value="">All</option>
+    </select>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Company</th>
+                <th>Location</th>
+                <th>Title</th>
+                <th>Link</th>
+            </tr>
+        </thead>
+        <tbody id="jobsTable">
+        </tbody>
+    </table>
+
+    <script>
+        let jobsData = [];
+
+        // Fetch companies and populate dropdown
+        fetch('/companies')
+            .then(res => res.json())
+            .then(companies => {
+                const companySelect = document.getElementById('companyFilter');
+                companies.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c;
+                    opt.textContent = c;
+                    companySelect.appendChild(opt);
+                });
+            });
+
+        // Fetch locations and populate dropdown
+        fetch('/locations')
+            .then(res => res.json())
+            .then(locations => {
+                const locationSelect = document.getElementById('locationFilter');
+                locations.forEach(l => {
+                    const opt = document.createElement('option');
+                    opt.value = l;
+                    opt.textContent = l;
+                    locationSelect.appendChild(opt);
+                });
+            });
+
+        // Fetch jobs
+        function fetchJobs() {
+            fetch('/jobs')
+                .then(res => res.json())
+                .then(jobs => {
+                    jobsData = jobs;
+                    renderJobs();
+                });
+        }
+
+        function renderJobs() {
+            const tbody = document.getElementById('jobsTable');
+            tbody.innerHTML = '';
+
+            const companyFilter = document.getElementById('companyFilter').value;
+            const locationFilter = document.getElementById('locationFilter').value;
+
+            const filteredJobs = jobsData.filter(job => {
+                return (!companyFilter || job.company === companyFilter) &&
+                       (!locationFilter || job.location === locationFilter);
+            });
+
+            filteredJobs.forEach(job => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${job.company}</td>
+                    <td>${job.location}</td>
+                    <td>${job.title}</td>
+                    <td><a href="${job.url}" target="_blank">Apply</a></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.getElementById('companyFilter').addEventListener('change', renderJobs);
+        document.getElementById('locationFilter').addEventListener('change', renderJobs);
+
+        fetchJobs();
+    </script>
+</body>
+</html>

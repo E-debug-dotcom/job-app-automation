@@ -3,6 +3,7 @@ import requests
 import sqlite3
 from hashlib import sha256
 from datetime import datetime
+import os
 
 SOURCE = "greenhouse_direct"
 
@@ -13,7 +14,7 @@ def sha256_hash(value):
 def parse_location(job):
     loc = job.get("location")
     if isinstance(loc, list):
-        return ", ".join([l.get("name","") for l in loc])
+        return ", ".join([l.get("name", "") for l in loc])
     elif isinstance(loc, dict):
         return loc.get("name", "")
     return ""
@@ -48,18 +49,24 @@ def insert_job_if_new(conn, company, job_record):
 def fetch_jobs(handle, api_url=None):
     if not api_url:
         api_url = f"https://boards-api.greenhouse.io/v1/boards/{handle}/jobs"
-    resp = requests.get(api_url)
+    resp = requests.get(api_url, timeout=10)
     resp.raise_for_status()
     data = resp.json()
     return data.get("jobs", [])
 
 def main(companies_file):
+    print("[DEBUG] starting greenhouse collector")
+
     with open(companies_file) as f:
         companies_list = json.load(f)
+
+    print(f"[DEBUG] loaded {len(companies_list)} companies from {companies_file}")
 
     conn = sqlite3.connect("db/jobs.db")
 
     total_added = 0
+    bad_companies = []
+
     for entry in companies_list:
         if isinstance(entry, str):
             handle = entry
@@ -86,9 +93,22 @@ def main(companies_file):
             print(f"[INFO] added {added} jobs for {handle}")
             total_added += added
         except requests.HTTPError as e:
-            print(f"[HTTP ERROR] {handle}: {e.response.status_code} {e.response.reason}")
+            status = e.response.status_code
+            print(f"[HTTP ERROR] {handle}: {status} {e.response.reason}")
+            if status in (404, 503):
+                bad_companies.append(handle)
         except Exception as e:
             print(f"[ERROR] {handle}: {e}")
+
+    # --- Cleanup: remove companies with repeated 404/503 ---
+    if bad_companies:
+        print(f"[WARN] Removing {len(bad_companies)} bad companies from {companies_file}: {bad_companies}")
+        companies_list = [c for c in companies_list if not (
+            (isinstance(c, str) and c in bad_companies) or
+            (isinstance(c, dict) and c.get("handle") in bad_companies)
+        )]
+        with open(companies_file, "w") as f:
+            json.dump(companies_list, f, indent=2)
 
     print(f"[DONE] total added: {total_added}")
     conn.close()
