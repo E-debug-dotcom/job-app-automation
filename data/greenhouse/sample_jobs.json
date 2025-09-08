@@ -1,0 +1,16 @@
+[
+  {
+    "id": "12345",
+    "title": "Software Engineer",
+    "location": {"name": "Toronto, ON, Canada"},
+    "absolute_url": "https://boards.greenhouse.io/techcorp/jobs/12345",
+    "updated_at": "2025-09-08T12:00:00Z"
+  },
+  {
+    "id": "12346",
+    "title": "IT Support Analyst",
+    "location": {"name": "Vancouver, BC, Canada"},
+    "absolute_url": "https://boards.greenhouse.io/techcorp/jobs/12346",
+    "updated_at": "2025-09-07T10:00:00Z"
+  }
+]

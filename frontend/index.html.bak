@@ -187,18 +187,19 @@ function setupCustomSelect(wrapperId, hiddenId, options, defaultLabel) {
 }
 
 async function fetchData() {
-  const [jobsRes, companiesRes, locationsRes] = await Promise.all([
-    fetch('/jobs'), fetch('/companies'), fetch('/locations')
-  ]);
+  const jobsRes = await fetch('http://127.0.0.1:5000/jobs');
   jobsData = await jobsRes.json();
-  const companies = await companiesRes.json();
-  const locations = await locationsRes.json();
+
+  // Optional: if you want to generate unique company/location lists from jobs
+  const companies = [...new Set(jobsData.map(j => j.company).filter(Boolean))];
+  const locations = [...new Set(jobsData.map(j => j.location).filter(Boolean))];
 
   setupCustomSelect('companyCustom', 'companyFilter', companies, 'All Companies');
   setupCustomSelect('locationCustom', 'locationFilter', locations, 'All Locations');
 
   renderJobs();
 }
+
 
 function renderJobs() {
   const company = document.getElementById('companyFilter').value.toLowerCase();

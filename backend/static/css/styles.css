@@ -1,0 +1,197 @@
+:root {
+  --filter-width: 250px;
+  --primary-color: #6366f1;
+  --primary-hover: #4f46e5;
+  --accent-color: #e0e7ff;
+  --table-bg: #fff;
+  --table-hover-shadow: rgba(0, 0, 0, 0.08);
+}
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #334155;
+}
+
+/* Search box */
+#searchInput {
+  padding: 10px 14px;
+  width: 320px;
+  max-width: 90%;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  margin-bottom: 15px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 16px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+#searchInput:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 6px rgba(99,102,241,0.3);
+}
+
+/* Filters */
+.filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+.filters button {
+  padding: 8px 12px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  background-color: var(--primary-color);
+  color: white;
+  transition: background 0.2s ease-in-out;
+}
+.filters button:hover {
+  background-color: var(--primary-hover);
+}
+.custom-select {
+  width: var(--filter-width);
+  position: relative;
+  font-size: 16px;
+}
+.custom-select__button {
+  width: 100%;
+  text-align: left;
+  padding: 8px 34px 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #fff;
+  color: #1e293b;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: relative;
+}
+.custom-select__button:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 5px rgba(99,102,241,0.3);
+}
+.custom-select__chevron {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #475569;
+}
+.custom-select__menu {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 4px);
+  width: 100%;
+  max-height: 260px;
+  overflow: auto;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  box-shadow: 0 8px 20px rgba(2,6,23,0.15);
+  display: none;
+  z-index: 1000;
+}
+.custom-select.open .custom-select__menu {
+  display: block;
+}
+.custom-select__option {
+  padding: 8px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.custom-select__option:hover,
+.custom-select__option[aria-selected="true"] {
+  background-color: var(--accent-color);
+}
+
+/* Table */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 10px;
+  background: var(--table-bg);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: box-shadow 0.3s;
+}
+th, td {
+  border-bottom: 1px solid #e2e8f0;
+  padding: 12px 15px;
+}
+th {
+  background-color: #f1f5f9;
+  color: #334155;
+  font-weight: 600;
+  text-align: left;
+}
+tbody tr {
+  transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+tbody tr:hover {
+  background-color: var(--accent-color);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 4px 10px var(--table-hover-shadow);
+}
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* Highlighted search matches */
+mark {
+  background-color: #fde68a;
+  color: #b45309;
+  font-weight: bold;
+}
+
+/* No results */
+#noResults {
+  text-align: center;
+  color: #64748b;
+  margin-top: 15px;
+  font-size: 16px;
+}
+
+/* Visually hidden */
+.visually-hidden {
+  position: absolute !important;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  white-space: nowrap;
+  clip-path: inset(50%);
+  border: 0;
+  padding: 0;
+  margin: -1px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .filters { flex-direction: column; align-items: center; }
+  .custom-select { width: 100%; max-width: 300px; }
+  #searchInput { width: 100%; max-width: 300px; }
+}

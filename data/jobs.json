@@ -1,0 +1,26 @@
+[
+  {
+    "title": "Software Engineer",
+    "company": "",
+    "location": "Toronto, ON, Canada",
+    "url": "https://boards.greenhouse.io/techcorp/jobs/12345",
+    "date_posted": "2025-09-08",
+    "id": "12345"
+  },
+  {
+    "title": "IT Support Analyst",
+    "company": "",
+    "location": "Vancouver, BC, Canada",
+    "url": "https://boards.greenhouse.io/techcorp/jobs/12346",
+    "date_posted": "2025-09-07",
+    "id": "12346"
+  },
+  {
+    "title": "Frontend Developer",
+    "company": "WebTech",
+    "location": "Montreal, QC, Canada",
+    "url": "https://jobs.lever.co/webtech/abc123",
+    "date_posted": "2025-09-06",
+    "id": "abc123"
+  }
+]

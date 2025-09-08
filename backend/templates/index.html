@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Job Board</title>
+
+  <!-- Link CSS from static folder -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+
+<h1>Job Board</h1>
+
+<!-- Search -->
+<input type="text" id="searchInput" placeholder="Search jobs...">
+
+<div class="filters">
+  <!-- Company Filter -->
+  <select id="companyFilter" class="visually-hidden" aria-hidden="true" tabindex="-1"></select>
+  <div id="companyCustom" class="custom-select" data-target="companyFilter">
+    <button type="button" class="custom-select__button" aria-haspopup="listbox" aria-expanded="false" aria-controls="companyMenu">
+      All Companies
+      <span class="custom-select__chevron">▾</span>
+    </button>
+    <ul id="companyMenu" class="custom-select__menu" role="listbox"></ul>
+  </div>
+  <button id="clearCompany">Clear</button>
+
+  <!-- Location Filter -->
+  <select id="locationFilter" class="visually-hidden" aria-hidden="true" tabindex="-1"></select>
+  <div id="locationCustom" class="custom-select" data-target="locationFilter">
+    <button type="button" class="custom-select__button" aria-haspopup="listbox" aria-expanded="false" aria-controls="locationMenu">
+      All Locations
+      <span class="custom-select__chevron">▾</span>
+    </button>
+    <ul id="locationMenu" class="custom-select__menu" role="listbox"></ul>
+  </div>
+  <button id="clearLocation">Clear</button>
+</div>
+
+<!-- Job Table -->
+<table id="jobsTable">
+  <thead>
+    <tr>
+      <th>Company</th>
+      <th>Location</th>
+      <th>Title</th>
+      <th>Apply</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<!-- Link JS from static folder -->
+<script src="{{ url_for('static', filename='js/jobs.js') }}"></script>
+
+</body>
+</html>

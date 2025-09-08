@@ -1,0 +1,10 @@
+[
+  {
+    "id": "abc123",
+    "title": "Frontend Developer",
+    "company": "WebTech",
+    "categories": {"location": "Montreal, QC, Canada"},
+    "url": "https://jobs.lever.co/webtech/abc123",
+    "date_posted": "2025-09-06"
+  }
+]
