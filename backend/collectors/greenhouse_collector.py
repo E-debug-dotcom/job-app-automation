@@ -1,23 +1,29 @@
+import argparse
 import json
 import requests
 import sqlite3
 from hashlib import sha256
 from datetime import datetime
-import os
+from pathlib import Path
 
 SOURCE = "greenhouse_direct"
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+DB_PATH = ROOT_DIR / "db" / "jobs.db"
+
 
 # --- Helper functions ---
 def sha256_hash(value):
     return sha256(value.encode("utf-8")).hexdigest()
 
+
 def parse_location(job):
     loc = job.get("location")
     if isinstance(loc, list):
         return ", ".join([l.get("name", "") for l in loc])
-    elif isinstance(loc, dict):
+    if isinstance(loc, dict):
         return loc.get("name", "")
     return ""
+
 
 def insert_job_if_new(conn, company, job_record):
     cursor = conn.cursor()
@@ -26,24 +32,29 @@ def insert_job_if_new(conn, company, job_record):
     cursor.execute("SELECT id FROM applications WHERE job_hash = ?", (job_hash,))
     if cursor.fetchone():
         return False
+
     now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-    cursor.execute("""
+    cursor.execute(
+        """
         INSERT INTO applications
         (external_id, company, title, location, url, source, date_posted, date_scraped, job_hash)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        job_record.get("external_id"),
-        company,
-        job_record.get("title"),
-        job_record.get("location"),
-        job_record.get("url"),
-        SOURCE,
-        job_record.get("date_posted"),
-        now,
-        job_hash
-    ))
+        """,
+        (
+            job_record.get("external_id"),
+            company,
+            job_record.get("title"),
+            job_record.get("location"),
+            job_record.get("url"),
+            SOURCE,
+            job_record.get("date_posted"),
+            now,
+            job_hash,
+        ),
+    )
     conn.commit()
     return True
+
 
 # --- Collector ---
 def fetch_jobs(handle, api_url=None):
@@ -54,15 +65,17 @@ def fetch_jobs(handle, api_url=None):
     data = resp.json()
     return data.get("jobs", [])
 
-def main(companies_file):
+
+def main(companies_file, prune_bad=False):
     print("[DEBUG] starting greenhouse collector")
 
-    with open(companies_file) as f:
+    with open(companies_file, encoding="utf-8") as f:
         companies_list = json.load(f)
 
     print(f"[DEBUG] loaded {len(companies_list)} companies from {companies_file}")
 
-    conn = sqlite3.connect("db/jobs.db")
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(str(DB_PATH))
 
     total_added = 0
     bad_companies = []
@@ -77,18 +90,25 @@ def main(companies_file):
         else:
             continue
 
+        if not handle:
+            continue
+
         print(f"[INFO] scanning {handle}")
         try:
             jobs = fetch_jobs(handle, api_url)
             added = 0
             for job in jobs:
-                if insert_job_if_new(conn, handle, {
-                    "external_id": str(job.get("id")),
-                    "title": job.get("title"),
-                    "location": parse_location(job),
-                    "url": job.get("absolute_url"),
-                    "date_posted": job.get("updated_at") or job.get("created_at")
-                }):
+                if insert_job_if_new(
+                    conn,
+                    handle,
+                    {
+                        "external_id": str(job.get("id")),
+                        "title": job.get("title"),
+                        "location": parse_location(job),
+                        "url": job.get("absolute_url"),
+                        "date_posted": job.get("updated_at") or job.get("created_at"),
+                    },
+                ):
                     added += 1
             print(f"[INFO] added {added} jobs for {handle}")
             total_added += added
@@ -100,22 +120,32 @@ def main(companies_file):
         except Exception as e:
             print(f"[ERROR] {handle}: {e}")
 
-    # --- Cleanup: remove companies with repeated 404/503 ---
     if bad_companies:
-        print(f"[WARN] Removing {len(bad_companies)} bad companies from {companies_file}: {bad_companies}")
-        companies_list = [c for c in companies_list if not (
-            (isinstance(c, str) and c in bad_companies) or
-            (isinstance(c, dict) and c.get("handle") in bad_companies)
-        )]
-        with open(companies_file, "w") as f:
-            json.dump(companies_list, f, indent=2)
+        print(f"[WARN] failed handles ({len(bad_companies)}): {bad_companies}")
+        if prune_bad:
+            print(f"[WARN] pruning failed handles from {companies_file}")
+            companies_list = [
+                c
+                for c in companies_list
+                if not (
+                    (isinstance(c, str) and c in bad_companies)
+                    or (isinstance(c, dict) and c.get("handle") in bad_companies)
+                )
+            ]
+            with open(companies_file, "w", encoding="utf-8") as f:
+                json.dump(companies_list, f, indent=2)
 
     print(f"[DONE] total added: {total_added}")
     conn.close()
 
+
 if __name__ == "__main__":
-    import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--companies", required=True, help="Path to companies.json")
+    parser.add_argument(
+        "--prune-bad",
+        action="store_true",
+        help="Remove handles that consistently fail with 404/503 from companies.json",
+    )
     args = parser.parse_args()
-    main(args.companies)
+    main(args.companies, prune_bad=args.prune_bad)
