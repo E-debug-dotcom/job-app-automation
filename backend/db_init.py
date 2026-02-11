@@ -1,9 +1,15 @@
 import sqlite3
 from datetime import datetime
+from pathlib import Path
 
-DB_PATH = "../db/jobs.db"
+ROOT_DIR = Path(__file__).resolve().parent.parent
+DB_DIR = ROOT_DIR / "db"
+DB_PATH = DB_DIR / "jobs.db"
 
-def init_db():
+
+def init_db(seed_sample_data=True):
+    DB_DIR.mkdir(parents=True, exist_ok=True)
+
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
@@ -32,7 +38,7 @@ def init_db():
             status TEXT DEFAULT 'pending',
             matched_skills TEXT,
             notes TEXT,
-            job_hash TEXT
+            job_hash TEXT UNIQUE
         )
     ''')
 
@@ -57,20 +63,37 @@ def init_db():
         )
     ''')
 
-    cursor.execute('''
-        INSERT INTO profiles (name, email, phone, default_resume)
-        VALUES (?, ?, ?, ?)
-    ''', ("Eleandro Girgis", "egirgis@email.com", "555-1234", "resume.pdf"))
+    if seed_sample_data:
+        cursor.execute("SELECT COUNT(*) FROM profiles")
+        profiles_count = cursor.fetchone()[0]
+        if profiles_count == 0:
+            cursor.execute('''
+                INSERT INTO profiles (name, email, phone, default_resume)
+                VALUES (?, ?, ?, ?)
+            ''', ("Eleandro Girgis", "egirgis@email.com", "555-1234", "resume.pdf"))
 
-    cursor.execute('''
-        INSERT INTO applications (external_id, company, title, location, url, source, date_posted, date_scraped)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ''', ("job123", "Example Corp", "IT Analyst", "Vancouver, BC", "https://example.com/job123", "ExampleSite",
-          "2025-09-01", datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        cursor.execute("SELECT COUNT(*) FROM applications")
+        apps_count = cursor.fetchone()[0]
+        if apps_count == 0:
+            cursor.execute('''
+                INSERT INTO applications (external_id, company, title, location, url, source, date_posted, date_scraped, job_hash)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                "job123",
+                "Example Corp",
+                "IT Analyst",
+                "Vancouver, BC",
+                "https://example.com/job123",
+                "ExampleSite",
+                "2025-09-01",
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "sample-job-123"
+            ))
 
     conn.commit()
     conn.close()
-    print("Database initialized with sample data.")
+    print(f"Database initialized at {DB_PATH}.")
+
 
 if __name__ == "__main__":
     init_db()
