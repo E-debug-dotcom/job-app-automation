@@ -254,8 +254,6 @@ function renderJobs() {
   const company = document.getElementById('companyFilter').value.toLowerCase();
   const location = document.getElementById('locationFilter').value.toLowerCase();
   const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-  const experience = document.getElementById('experienceFilter').value.toLowerCase();
-  const workType = document.getElementById('workTypeFilter').value.toLowerCase();
   const tbody = document.getElementById('jobsTable').querySelector('tbody');
   tbody.innerHTML = '';
 
@@ -263,15 +261,11 @@ function renderJobs() {
     const companyText = (job.company || '').toLowerCase();
     const locationText = (job.location || '').toLowerCase();
     const titleText = (job.title || '').toLowerCase();
-    const experienceText = (job.experience_level || job.experience || '').toLowerCase();
-    const workTypeText = (job.work_type || '').toLowerCase();
 
     const matchCompany = !company || companyText === company;
     const matchLocation = !location || locationText === location;
-    const matchExperience = !experience || experienceText === experience;
-    const matchWorkType = !workType || workTypeText === workType;
     const matchSearch = !searchTerm || titleText.includes(searchTerm) || companyText.includes(searchTerm) || locationText.includes(searchTerm);
-    return matchCompany && matchLocation && matchExperience && matchWorkType && matchSearch;
+    return matchCompany && matchLocation && matchSearch;
   });
 
   if (filtered.length === 0) {
@@ -295,8 +289,6 @@ function renderJobs() {
 
 document.getElementById('companyFilter').addEventListener('change', renderJobs);
 document.getElementById('locationFilter').addEventListener('change', renderJobs);
-document.getElementById('experienceFilter').addEventListener('change', renderJobs);
-document.getElementById('workTypeFilter').addEventListener('change', renderJobs);
 document.getElementById('searchInput').addEventListener('input', renderJobs);
 
 document.getElementById('clearCompany').addEventListener('click', () => {
