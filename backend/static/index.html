@@ -12,6 +12,23 @@
   body { font-family: Arial, sans-serif; margin: 20px; background: #f8fafc; color: #1e293b; }
   h1 { text-align: center; margin-bottom: 30px; color: #334155; }
 
+  #searchInput {
+    display: block;
+    margin: 0 auto 14px auto;
+    width: 100%;
+    max-width: 480px;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 16px;
+    background: #fff;
+  }
+  #searchInput:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 5px rgba(99,102,241,0.3);
+    outline: none;
+  }
+
   .filters {
     display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px;
     position: relative;
@@ -88,6 +105,8 @@
 <body>
 
 <h1>Job Board</h1>
+
+<input type="text" id="searchInput" placeholder="Search jobs by title, company, or location..." aria-label="Search jobs">
 
 <div class="filters">
   <!-- Company -->
@@ -203,14 +222,25 @@ async function fetchData() {
 function renderJobs() {
   const company = document.getElementById('companyFilter').value.toLowerCase();
   const location = document.getElementById('locationFilter').value.toLowerCase();
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase();
   const tbody = document.getElementById('jobsTable').querySelector('tbody');
   tbody.innerHTML = '';
 
   const filtered = jobsData.filter(job => {
-    const matchCompany = !company || (job.company && job.company.toLowerCase() === company);
-    const matchLocation = !location || (job.location && job.location.toLowerCase() === location);
-    return matchCompany && matchLocation;
+    const companyText = (job.company || '').toLowerCase();
+    const locationText = (job.location || '').toLowerCase();
+    const titleText = (job.title || '').toLowerCase();
+
+    const matchCompany = !company || companyText === company;
+    const matchLocation = !location || locationText === location;
+    const matchSearch = !searchTerm || titleText.includes(searchTerm) || companyText.includes(searchTerm) || locationText.includes(searchTerm);
+    return matchCompany && matchLocation && matchSearch;
   });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#64748b;">No jobs match your search or filters.</td></tr>`;
+    return;
+  }
 
   filtered.forEach((job, index) => {
     const tr = document.createElement('tr');
@@ -228,6 +258,7 @@ function renderJobs() {
 
 document.getElementById('companyFilter').addEventListener('change', renderJobs);
 document.getElementById('locationFilter').addEventListener('change', renderJobs);
+document.getElementById('searchInput').addEventListener('input', renderJobs);
 
 document.getElementById('clearCompany').addEventListener('click', () => {
   const hidden = document.getElementById('companyFilter');

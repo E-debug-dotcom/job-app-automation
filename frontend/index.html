@@ -11,6 +11,8 @@
 
 <h1>Job Board</h1>
 
+<input type="text" id="searchInput" placeholder="Search jobs by title, company, or location..." aria-label="Search jobs">
+
 <div class="filters">
   <!-- Company Filter -->
   <select id="companyFilter" class="visually-hidden" aria-hidden="true" tabindex="-1"></select>
@@ -132,14 +134,25 @@ async function fetchData() {
 function renderJobs() {
   const company = document.getElementById('companyFilter').value.toLowerCase();
   const location = document.getElementById('locationFilter').value.toLowerCase();
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase();
   const tbody = document.querySelector('#jobsTable tbody');
   tbody.innerHTML = '';
 
   const filtered = jobsData.filter(job => {
-    const matchCompany = !company || (job.company && job.company.toLowerCase() === company);
-    const matchLocation = !location || (job.location && job.location.toLowerCase() === location);
-    return matchCompany && matchLocation;
+    const companyText = (job.company || '').toLowerCase();
+    const locationText = (job.location || '').toLowerCase();
+    const titleText = (job.title || '').toLowerCase();
+
+    const matchCompany = !company || companyText === company;
+    const matchLocation = !location || locationText === location;
+    const matchSearch = !searchTerm || titleText.includes(searchTerm) || companyText.includes(searchTerm) || locationText.includes(searchTerm);
+    return matchCompany && matchLocation && matchSearch;
   });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" id="noResults">No jobs match your search or filters.</td></tr>`;
+    return;
+  }
 
   filtered.forEach((job, index) => {
     const tr = document.createElement('tr');
@@ -160,6 +173,7 @@ function renderJobs() {
 // ==========================
 document.getElementById('companyFilter').addEventListener('change', renderJobs);
 document.getElementById('locationFilter').addEventListener('change', renderJobs);
+document.getElementById('searchInput').addEventListener('input', renderJobs);
 
 document.getElementById('clearCompany').addEventListener('click', () => {
   const hidden = document.getElementById('companyFilter');
