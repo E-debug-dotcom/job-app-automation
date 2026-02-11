@@ -35,6 +35,28 @@
     <ul id="locationMenu" class="custom-select__menu" role="listbox"></ul>
   </div>
   <button id="clearLocation">Clear</button>
+
+  <!-- Experience Filter -->
+  <select id="experienceFilter" class="visually-hidden" aria-hidden="true" tabindex="-1"></select>
+  <div id="experienceCustom" class="custom-select" data-target="experienceFilter">
+    <button type="button" class="custom-select__button" aria-haspopup="listbox" aria-expanded="false" aria-controls="experienceMenu">
+      All Experience Levels
+      <span class="custom-select__chevron">▾</span>
+    </button>
+    <ul id="experienceMenu" class="custom-select__menu" role="listbox"></ul>
+  </div>
+  <button id="clearExperience">Clear</button>
+
+  <!-- Work Type Filter -->
+  <select id="workTypeFilter" class="visually-hidden" aria-hidden="true" tabindex="-1"></select>
+  <div id="workTypeCustom" class="custom-select" data-target="workTypeFilter">
+    <button type="button" class="custom-select__button" aria-haspopup="listbox" aria-expanded="false" aria-controls="workTypeMenu">
+      All Work Types
+      <span class="custom-select__chevron">▾</span>
+    </button>
+    <ul id="workTypeMenu" class="custom-select__menu" role="listbox"></ul>
+  </div>
+  <button id="clearWorkType">Clear</button>
 </div>
 
 <!-- Jobs Table -->
@@ -122,8 +144,13 @@ async function fetchData() {
   const companies = await companiesRes.json();
   const locations = await locationsRes.json();
 
+  const experienceLevels = ['Entry', 'Mid', 'Senior', 'Executive'];
+  const workTypes = ['Remote', 'Hybrid', 'On-Site'];
+
   setupCustomSelect('companyCustom', 'companyFilter', companies, 'All Companies');
   setupCustomSelect('locationCustom', 'locationFilter', locations, 'All Locations');
+  setupCustomSelect('experienceCustom', 'experienceFilter', experienceLevels, 'All Experience Levels');
+  setupCustomSelect('workTypeCustom', 'workTypeFilter', workTypes, 'All Work Types');
 
   renderJobs();
 }
@@ -191,6 +218,26 @@ document.getElementById('clearLocation').addEventListener('click', () => {
   hidden.dispatchEvent(new Event('change', { bubbles: true }));
   const wrapper = document.getElementById('locationCustom');
   wrapper.querySelector('.custom-select__button').firstChild.nodeValue = 'All Locations ';
+  wrapper.querySelectorAll('[aria-selected="true"]').forEach(n => n.removeAttribute('aria-selected'));
+  wrapper.querySelector('.custom-select__option').setAttribute('aria-selected', 'true');
+});
+
+document.getElementById('clearExperience').addEventListener('click', () => {
+  const hidden = document.getElementById('experienceFilter');
+  hidden.value = '';
+  hidden.dispatchEvent(new Event('change', { bubbles: true }));
+  const wrapper = document.getElementById('experienceCustom');
+  wrapper.querySelector('.custom-select__button').firstChild.nodeValue = 'All Experience Levels ';
+  wrapper.querySelectorAll('[aria-selected="true"]').forEach(n => n.removeAttribute('aria-selected'));
+  wrapper.querySelector('.custom-select__option').setAttribute('aria-selected', 'true');
+});
+
+document.getElementById('clearWorkType').addEventListener('click', () => {
+  const hidden = document.getElementById('workTypeFilter');
+  hidden.value = '';
+  hidden.dispatchEvent(new Event('change', { bubbles: true }));
+  const wrapper = document.getElementById('workTypeCustom');
+  wrapper.querySelector('.custom-select__button').firstChild.nodeValue = 'All Work Types ';
   wrapper.querySelectorAll('[aria-selected="true"]').forEach(n => n.removeAttribute('aria-selected'));
   wrapper.querySelector('.custom-select__option').setAttribute('aria-selected', 'true');
 });
