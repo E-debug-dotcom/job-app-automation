@@ -1,10 +1,13 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template
 from flask_cors import CORS
 import sqlite3
 import re
 from pathlib import Path
 
-app = Flask(__name__, static_folder="static", static_url_path="/static")
+app = Flask(__name__, 
+            template_folder="templates",
+            static_folder="static", 
+            static_url_path="/static")
 CORS(app)  # Allow cross-origin requests
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -58,7 +61,7 @@ def get_locations():
 # ----------------- Serve Frontend -----------------
 @app.route("/")
 def index():
-    return app.send_static_file("index.html")
+    return render_template("index.html")
 
 # ----------------- Main -----------------
 if __name__ == "__main__":
