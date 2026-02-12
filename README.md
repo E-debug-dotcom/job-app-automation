@@ -62,6 +62,11 @@ python3 backend/app.py
 
 Open: `http://127.0.0.1:5000/`
 
+Runtime behavior notes:
+- API data is read from SQLite (`db/jobs.db`, table `applications`).
+- If schema is missing, the app auto-initializes via `backend/db_init.py`.
+- Frontend is served from `frontend/` when present (fallback to `backend/templates` + `backend/static`).
+
 ## API endpoints
 
 - `GET /jobs` → list of jobs
