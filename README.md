@@ -81,3 +81,24 @@ python3 backend/app.py
 1. Add a `Makefile` for one-command setup/run.
 2. Add tests for DB pathing and API endpoint responses.
 3. Consolidate duplicate frontend copies (`frontend/` and inline static variants) once runtime path is finalized.
+
+## Troubleshooting merge conflicts (UI filters)
+
+If you merged a PR but still do not see the search bar/extra filters, your branch may have accepted only one side of a conflict.
+
+When resolving conflicts in these files, keep the versions that include:
+- `searchInput`
+- `experienceFilter` and `workTypeFilter`
+- filter logic for company + location + experience + work type
+
+Files commonly affected:
+- `frontend/index.html`
+- `backend/static/index.html`
+
+After resolving conflicts:
+
+```bash
+git add frontend/index.html backend/static/index.html
+git commit -m "Resolve UI filter merge conflicts"
+git push
+```
