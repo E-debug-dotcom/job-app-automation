@@ -272,6 +272,7 @@ function renderJobs() {
     const matchWorkType = !workType || workTypeText === workType;
     const matchSearch = !searchTerm || titleText.includes(searchTerm) || companyText.includes(searchTerm) || locationText.includes(searchTerm);
     return matchCompany && matchLocation && matchExperience && matchWorkType && matchSearch;
+
   });
 
   if (filtered.length === 0) {
