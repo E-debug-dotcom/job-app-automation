@@ -1,5 +1,36 @@
 let jobsData = [];
 
+function deriveExperience(job) {
+  const explicit = job.experience_level || job.experience || '';
+  if (explicit) return explicit;
+
+  const title = (job.title || '').toLowerCase();
+  if (/\b(intern|junior|jr|entry)\b/.test(title)) return 'Entry';
+  if (/\b(staff|principal|architect|director|head|vp|executive|chief)\b/.test(title)) return 'Executive';
+  if (/\b(senior|sr|lead)\b/.test(title)) return 'Senior';
+  if (title) return 'Mid';
+  return '';
+}
+
+function deriveWorkType(job) {
+  const explicit = job.work_type || '';
+  if (explicit) return explicit;
+
+  const location = (job.location || '').toLowerCase();
+  const title = (job.title || '').toLowerCase();
+  const combined = `${location} ${title}`;
+
+  if (combined.includes('hybrid')) return 'Hybrid';
+  if (combined.includes('remote')) return 'Remote';
+  if (combined.includes('on-site') || combined.includes('onsite')) return 'On-Site';
+
+  return '';
+}
+
+function uniqSorted(values) {
+  return [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b));
+}
+
 function setupCustomSelect(wrapperId, hiddenId, options, defaultLabel) {
   const hiddenSelect = document.getElementById(hiddenId);
   const wrapper = document.getElementById(wrapperId);
@@ -22,6 +53,7 @@ function setupCustomSelect(wrapperId, hiddenId, options, defaultLabel) {
       opt.textContent = value;
       hiddenSelect.appendChild(opt);
     }
+
     const li = document.createElement('li');
     li.className = 'custom-select__option';
     li.setAttribute('role', 'option');
@@ -34,16 +66,17 @@ function setupCustomSelect(wrapperId, hiddenId, options, defaultLabel) {
   button.addEventListener('click', () => {
     wrapper.classList.toggle('open');
     button.setAttribute('aria-expanded', wrapper.classList.contains('open'));
-    menu.style.width = wrapper.clientWidth + 'px';
+    menu.style.width = `${wrapper.clientWidth}px`;
   });
 
   menu.addEventListener('click', (e) => {
     const item = e.target.closest('.custom-select__option');
     if (!item) return;
+
     const val = item.getAttribute('data-value') || '';
-    menu.querySelectorAll('[aria-selected="true"]').forEach(n => n.removeAttribute('aria-selected'));
+    menu.querySelectorAll('[aria-selected="true"]').forEach((n) => n.removeAttribute('aria-selected'));
     item.setAttribute('aria-selected', 'true');
-    button.firstChild.nodeValue = (val || defaultLabel) + ' ';
+    button.firstChild.nodeValue = `${val || defaultLabel} `;
     hiddenSelect.value = val;
     hiddenSelect.dispatchEvent(new Event('change', { bubbles: true }));
     wrapper.classList.remove('open');
@@ -57,12 +90,13 @@ async function fetchData() {
     fetch('/companies'),
     fetch('/locations')
   ]);
+
   jobsData = await jobsRes.json();
   const companies = await companiesRes.json();
   const locations = await locationsRes.json();
 
-  const experienceLevels = ['Entry', 'Mid', 'Senior', 'Executive'];
-  const workTypes = ['Remote', 'Hybrid', 'On-Site'];
+  const experienceLevels = uniqSorted(jobsData.map(deriveExperience));
+  const workTypes = uniqSorted(jobsData.map(deriveWorkType));
 
   setupCustomSelect('companyCustom', 'companyFilter', companies, 'All Companies');
   setupCustomSelect('locationCustom', 'locationFilter', locations, 'All Locations');
@@ -87,23 +121,27 @@ function renderJobs() {
   const tbody = document.querySelector('#jobsTable tbody');
   tbody.innerHTML = '';
 
-  const filtered = jobsData.filter(job => {
+  const filtered = jobsData.filter((job) => {
     const companyText = (job.company || '').toLowerCase();
     const locationText = (job.location || '').toLowerCase();
     const titleText = (job.title || '').toLowerCase();
-    const experienceText = (job.experience_level || job.experience || '').toLowerCase();
-    const workTypeText = (job.work_type || '').toLowerCase();
+    const experienceText = deriveExperience(job).toLowerCase();
+    const workTypeText = deriveWorkType(job).toLowerCase();
 
     const matchCompany = !company || companyText === company;
     const matchLocation = !location || locationText === location;
     const matchExperience = !experience || experienceText === experience;
     const matchWorkType = !workType || workTypeText === workType;
-    const matchSearch = !searchTerm || titleText.includes(searchTerm) || companyText.includes(searchTerm) || locationText.includes(searchTerm);
+    const matchSearch = !searchTerm
+      || titleText.includes(searchTerm)
+      || companyText.includes(searchTerm)
+      || locationText.includes(searchTerm);
+
     return matchCompany && matchLocation && matchExperience && matchWorkType && matchSearch;
   });
 
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4" id="noResults">No jobs match your search or filters.</td></tr>`;
+    tbody.innerHTML = '<tr><td colspan="4" id="noResults">No jobs match your search or filters.</td></tr>';
     return;
   }
 
@@ -116,9 +154,21 @@ function renderJobs() {
       <td>${highlightMatch(job.title ?? '', searchTerm)}</td>
       <td><a href="${job.url ?? '#'}" target="_blank">Apply</a></td>
     `;
+
     tbody.appendChild(tr);
     setTimeout(() => { tr.style.opacity = 1; }, index * 50);
   });
+}
+
+function clearCustomSelect(hiddenId, wrapperId, defaultLabel) {
+  const hidden = document.getElementById(hiddenId);
+  hidden.value = '';
+  hidden.dispatchEvent(new Event('change', { bubbles: true }));
+
+  const wrapper = document.getElementById(wrapperId);
+  wrapper.querySelector('.custom-select__button').firstChild.nodeValue = `${defaultLabel} `;
+  wrapper.querySelectorAll('[aria-selected="true"]').forEach((n) => n.removeAttribute('aria-selected'));
+  wrapper.querySelector('.custom-select__option').setAttribute('aria-selected', 'true');
 }
 
 // Event listeners
@@ -129,44 +179,19 @@ document.getElementById('workTypeFilter').addEventListener('change', renderJobs)
 document.getElementById('searchInput').addEventListener('input', renderJobs);
 
 document.getElementById('clearCompany').addEventListener('click', () => {
-  const hidden = document.getElementById('companyFilter');
-  hidden.value = '';
-  hidden.dispatchEvent(new Event('change', { bubbles: true }));
-  const wrapper = document.getElementById('companyCustom');
-  wrapper.querySelector('.custom-select__button').firstChild.nodeValue = 'All Companies ';
-  wrapper.querySelectorAll('[aria-selected="true"]').forEach(n => n.removeAttribute('aria-selected'));
-  wrapper.querySelector('.custom-select__option').setAttribute('aria-selected', 'true');
+  clearCustomSelect('companyFilter', 'companyCustom', 'All Companies');
 });
 
 document.getElementById('clearLocation').addEventListener('click', () => {
-  const hidden = document.getElementById('locationFilter');
-  hidden.value = '';
-  hidden.dispatchEvent(new Event('change', { bubbles: true }));
-  const wrapper = document.getElementById('locationCustom');
-  wrapper.querySelector('.custom-select__button').firstChild.nodeValue = 'All Locations ';
-  wrapper.querySelectorAll('[aria-selected="true"]').forEach(n => n.removeAttribute('aria-selected'));
-  wrapper.querySelector('.custom-select__option').setAttribute('aria-selected', 'true');
+  clearCustomSelect('locationFilter', 'locationCustom', 'All Locations');
 });
 
-
 document.getElementById('clearExperience').addEventListener('click', () => {
-  const hidden = document.getElementById('experienceFilter');
-  hidden.value = '';
-  hidden.dispatchEvent(new Event('change', { bubbles: true }));
-  const wrapper = document.getElementById('experienceCustom');
-  wrapper.querySelector('.custom-select__button').firstChild.nodeValue = 'All Experience Levels ';
-  wrapper.querySelectorAll('[aria-selected="true"]').forEach(n => n.removeAttribute('aria-selected'));
-  wrapper.querySelector('.custom-select__option').setAttribute('aria-selected', 'true');
+  clearCustomSelect('experienceFilter', 'experienceCustom', 'All Experience Levels');
 });
 
 document.getElementById('clearWorkType').addEventListener('click', () => {
-  const hidden = document.getElementById('workTypeFilter');
-  hidden.value = '';
-  hidden.dispatchEvent(new Event('change', { bubbles: true }));
-  const wrapper = document.getElementById('workTypeCustom');
-  wrapper.querySelector('.custom-select__button').firstChild.nodeValue = 'All Work Types ';
-  wrapper.querySelectorAll('[aria-selected="true"]').forEach(n => n.removeAttribute('aria-selected'));
-  wrapper.querySelector('.custom-select__option').setAttribute('aria-selected', 'true');
+  clearCustomSelect('workTypeFilter', 'workTypeCustom', 'All Work Types');
 });
 
 // Initialize
