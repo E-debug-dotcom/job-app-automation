@@ -17,6 +17,7 @@ DB_PATH = ROOT_DIR / "db" / "jobs.db"
 
 def ensure_database():
     """Ensure SQLite DB schema exists using backend/db_init.py."""
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(str(DB_PATH))
     cur = conn.cursor()
     cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='applications'")
