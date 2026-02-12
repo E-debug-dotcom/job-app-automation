@@ -180,11 +180,6 @@ function renderJobs() {
     const matchWorkType = !workType || workTypeText === workType;
     const matchSearch = !searchTerm || titleText.includes(searchTerm) || companyText.includes(searchTerm) || locationText.includes(searchTerm);
     return matchCompany && matchLocation && matchExperience && matchWorkType && matchSearch;
-
-    const matchCompany = !company || companyText === company;
-    const matchLocation = !location || locationText === location;
-    const matchSearch = !searchTerm || titleText.includes(searchTerm) || companyText.includes(searchTerm) || locationText.includes(searchTerm);
-    return matchCompany && matchLocation && matchSearch;
   });
 
   if (filtered.length === 0) {
