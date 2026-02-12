@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Job Board</title>
-<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
 
@@ -68,6 +68,6 @@
   </table>
 </div>
 
-<script src="js/jobs.js"></script>
+<script src="{{ url_for('static', filename='js/jobs.js') }}"></script>
 </body>
 </html>
