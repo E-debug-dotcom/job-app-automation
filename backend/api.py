@@ -7,7 +7,11 @@ import subprocess
 import sys
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
+BACKEND_DIR = Path(__file__).resolve().parent
 FRONTEND_DIR = ROOT_DIR / "frontend"
+TEMPLATE_DIR = FRONTEND_DIR if FRONTEND_DIR.exists() else BACKEND_DIR / "templates"
+STATIC_DIR = FRONTEND_DIR if FRONTEND_DIR.exists() else BACKEND_DIR / "static"
+STATIC_URL_PATH = "" if FRONTEND_DIR.exists() else "/static"
 DB_PATH = ROOT_DIR / "db" / "jobs.db"
 
 
@@ -25,9 +29,9 @@ def ensure_database():
 
 app = Flask(
     __name__,
-    template_folder=str(FRONTEND_DIR),
-    static_folder=str(FRONTEND_DIR),
-    static_url_path="",
+    template_folder=str(TEMPLATE_DIR),
+    static_folder=str(STATIC_DIR),
+    static_url_path=STATIC_URL_PATH,
 )
 CORS(app)
 
@@ -84,5 +88,6 @@ def get_locations():
 
 
 if __name__ == "__main__":
-    print("Serving frontend from:", FRONTEND_DIR)
+    print("Serving templates from:", TEMPLATE_DIR)
+    print("Serving static from:", STATIC_DIR, "at", STATIC_URL_PATH or "/")
     app.run(debug=True)
