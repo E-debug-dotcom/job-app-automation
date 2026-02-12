@@ -10,7 +10,7 @@ BACKEND_DIR = Path(__file__).resolve().parent
 FRONTEND_DIR = ROOT_DIR / "frontend"
 TEMPLATE_DIR = FRONTEND_DIR if FRONTEND_DIR.exists() else BACKEND_DIR / "templates"
 STATIC_DIR = FRONTEND_DIR if FRONTEND_DIR.exists() else BACKEND_DIR / "static"
-STATIC_URL_PATH = "/static"
+STATIC_URL_PATH = "" if FRONTEND_DIR.exists() else "/static"
 DB_PATH = ROOT_DIR / "db" / "jobs.db"
 
 
