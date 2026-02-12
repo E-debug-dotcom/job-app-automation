@@ -2,11 +2,13 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 import sqlite3
 import re
+from pathlib import Path
 
 app = Flask(__name__, static_folder="static", static_url_path="/static")
 CORS(app)  # Allow cross-origin requests
 
-DB_PATH = "db/jobs.db"
+ROOT_DIR = Path(__file__).resolve().parent.parent
+DB_PATH = ROOT_DIR / "db" / "jobs.db"
 
 # ----------------- Helper Functions -----------------
 def normalize_location(loc):
@@ -22,7 +24,7 @@ def normalize_location(loc):
     return loc
 
 def query_db(query, args=()):
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(str(DB_PATH))
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
     cur.execute(query, args)
