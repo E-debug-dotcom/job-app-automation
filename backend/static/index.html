@@ -4,103 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Job Board</title>
-<style>
-  :root {
-    --filter-width: 250px;
-  }
-
-  body { font-family: Arial, sans-serif; margin: 20px; background: #f8fafc; color: #1e293b; }
-  h1 { text-align: center; margin-bottom: 30px; color: #334155; }
-
-  #searchInput {
-    display: block;
-    margin: 0 auto 14px auto;
-    width: 100%;
-    max-width: 480px;
-    padding: 10px 12px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    font-size: 16px;
-    background: #fff;
-  }
-  #searchInput:focus {
-    border-color: #6366f1;
-    box-shadow: 0 0 5px rgba(99,102,241,0.3);
-    outline: none;
-  }
-
-  .filters {
-    display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px;
-    position: relative;
-  }
-
-  .filters button {
-    padding: 8px 12px; font-size: 16px; cursor: pointer; border: none; border-radius: 6px; background-color: #6366f1; color: white;
-    transition: background 0.2s ease-in-out;
-  }
-  .filters button:hover { background-color: #4f46e5; }
-
-  /* Custom dropdown */
-  .custom-select {
-    width: var(--filter-width);
-    position: relative;
-    font-size: 16px;
-  }
-  .custom-select__button {
-    width: 100%;
-    text-align: left;
-    padding: 8px 34px 8px 10px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    background: #fff;
-    color: #1e293b;
-    cursor: pointer;
-    outline: none;
-    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    position: relative;
-  }
-  .custom-select__button:focus {
-    border-color: #6366f1; box-shadow: 0 0 5px rgba(99,102,241,0.3);
-  }
-  .custom-select__chevron {
-    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-    pointer-events: none; color: #475569;
-  }
-  .custom-select__menu {
-    position: absolute; left: 0; top: calc(100% + 4px);
-    width: 100%;
-    max-height: 260px; overflow: auto;
-    background: #fff; border: 1px solid #cbd5e1; border-radius: 6px;
-    box-shadow: 0 8px 20px rgba(2,6,23,0.15);
-    display: none; z-index: 1000;
-  }
-  .custom-select.open .custom-select__menu { display: block; }
-  .custom-select__option {
-    padding: 8px 10px; cursor: pointer; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;
-  }
-  .custom-select__option:hover,
-  .custom-select__option[aria-selected="true"] {
-    background-color: #e0e7ff;
-  }
-
-  table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; border-radius: 6px; overflow: hidden; }
-  th, td { border-bottom: 1px solid #e2e8f0; padding: 12px 10px; text-align: left; }
-  th { background-color: #f1f5f9; color: #334155; font-weight: 600; }
-  tbody tr { transition: background 0.3s, transform 0.3s; }
-  tbody tr:hover { background-color: #e0e7ff; transform: translateY(-2px); }
-
-  a { color: #4f46e5; text-decoration: none; }
-  a:hover { text-decoration: underline; }
-
-  .visually-hidden {
-    position: absolute !important;
-    height: 1px; width: 1px;
-    overflow: hidden; clip: rect(1px, 1px, 1px, 1px);
-    white-space: nowrap; clip-path: inset(50%);
-    border: 0; padding: 0; margin: -1px;
-  }
-</style>
+<link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
@@ -109,10 +13,7 @@
 <input type="text" id="searchInput" placeholder="Search jobs by title, company, or location..." aria-label="Search jobs">
 
 <div class="filters">
-  <!-- Company -->
-  <select id="companyFilter" class="visually-hidden" aria-hidden="true" tabindex="-1">
-    <option value="">All Companies</option>
-  </select>
+  <select id="companyFilter" class="visually-hidden" aria-hidden="true" tabindex="-1"></select>
   <div id="companyCustom" class="custom-select" data-target="companyFilter">
     <button type="button" class="custom-select__button" aria-haspopup="listbox" aria-expanded="false" aria-controls="companyMenu">
       All Companies
@@ -122,10 +23,7 @@
   </div>
   <button id="clearCompany">Clear</button>
 
-  <!-- Location -->
-  <select id="locationFilter" class="visually-hidden" aria-hidden="true" tabindex="-1">
-    <option value="">All Locations</option>
-  </select>
+  <select id="locationFilter" class="visually-hidden" aria-hidden="true" tabindex="-1"></select>
   <div id="locationCustom" class="custom-select" data-target="locationFilter">
     <button type="button" class="custom-select__button" aria-haspopup="listbox" aria-expanded="false" aria-controls="locationMenu">
       All Locations
@@ -135,10 +33,7 @@
   </div>
   <button id="clearLocation">Clear</button>
 
-  <!-- Experience -->
-  <select id="experienceFilter" class="visually-hidden" aria-hidden="true" tabindex="-1">
-    <option value="">All Experience Levels</option>
-  </select>
+  <select id="experienceFilter" class="visually-hidden" aria-hidden="true" tabindex="-1"></select>
   <div id="experienceCustom" class="custom-select" data-target="experienceFilter">
     <button type="button" class="custom-select__button" aria-haspopup="listbox" aria-expanded="false" aria-controls="experienceMenu">
       All Experience Levels
@@ -148,10 +43,7 @@
   </div>
   <button id="clearExperience">Clear</button>
 
-  <!-- Work Type -->
-  <select id="workTypeFilter" class="visually-hidden" aria-hidden="true" tabindex="-1">
-    <option value="">All Work Types</option>
-  </select>
+  <select id="workTypeFilter" class="visually-hidden" aria-hidden="true" tabindex="-1"></select>
   <div id="workTypeCustom" class="custom-select" data-target="workTypeFilter">
     <button type="button" class="custom-select__button" aria-haspopup="listbox" aria-expanded="false" aria-controls="workTypeMenu">
       All Work Types
@@ -162,185 +54,20 @@
   <button id="clearWorkType">Clear</button>
 </div>
 
-<table id="jobsTable">
-  <thead>
-    <tr>
-      <th>Company</th>
-      <th>Location</th>
-      <th>Title</th>
-      <th>Apply</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+<div class="table-container">
+  <table id="jobsTable">
+    <thead>
+      <tr>
+        <th>Company</th>
+        <th>Location</th>
+        <th>Title</th>
+        <th>Apply</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
 
-<script>
-let jobsData = [];
-
-// Utility for custom dropdowns
-function setupCustomSelect(wrapperId, hiddenId, options, defaultLabel) {
-  const hiddenSelect = document.getElementById(hiddenId);
-  const wrapper = document.getElementById(wrapperId);
-  const button = wrapper.querySelector('.custom-select__button');
-  const menu = wrapper.querySelector('.custom-select__menu');
-
-  hiddenSelect.innerHTML = '';
-  menu.innerHTML = '';
-
-  const defaultOpt = document.createElement('option');
-  defaultOpt.value = '';
-  defaultOpt.textContent = defaultLabel;
-  hiddenSelect.appendChild(defaultOpt);
-
-  const allValues = [''].concat(options);
-
-  allValues.forEach((value, idx) => {
-    if (idx > 0) {
-      const opt = document.createElement('option');
-      opt.value = value;
-      opt.textContent = value;
-      hiddenSelect.appendChild(opt);
-    }
-
-    const li = document.createElement('li');
-    li.className = 'custom-select__option';
-    li.setAttribute('role', 'option');
-    li.setAttribute('data-value', value);
-    li.textContent = value || defaultLabel;
-    if (idx === 0) li.setAttribute('aria-selected', 'true');
-    menu.appendChild(li);
-  });
-
-  button.addEventListener('click', () => {
-    wrapper.classList.toggle('open');
-    button.setAttribute('aria-expanded', wrapper.classList.contains('open'));
-    menu.style.width = wrapper.clientWidth + 'px';
-  });
-
-  menu.addEventListener('click', (e) => {
-    const item = e.target.closest('.custom-select__option');
-    if (!item) return;
-    const val = item.getAttribute('data-value') || '';
-    menu.querySelectorAll('[aria-selected="true"]').forEach(n => n.removeAttribute('aria-selected'));
-    item.setAttribute('aria-selected', 'true');
-    button.firstChild.nodeValue = (val || defaultLabel) + ' ';
-    hiddenSelect.value = val;
-    hiddenSelect.dispatchEvent(new Event('change', { bubbles: true }));
-    wrapper.classList.remove('open');
-    button.setAttribute('aria-expanded', 'false');
-  });
-}
-
-async function fetchData() {
-  const [jobsRes, companiesRes, locationsRes] = await Promise.all([
-    fetch('/jobs'), fetch('/companies'), fetch('/locations')
-  ]);
-  jobsData = await jobsRes.json();
-  const companies = await companiesRes.json();
-  const locations = await locationsRes.json();
-
-  const experienceLevels = ['Entry', 'Mid', 'Senior', 'Executive'];
-  const workTypes = ['Remote', 'Hybrid', 'On-Site'];
-
-  setupCustomSelect('companyCustom', 'companyFilter', companies, 'All Companies');
-  setupCustomSelect('locationCustom', 'locationFilter', locations, 'All Locations');
-  setupCustomSelect('experienceCustom', 'experienceFilter', experienceLevels, 'All Experience Levels');
-  setupCustomSelect('workTypeCustom', 'workTypeFilter', workTypes, 'All Work Types');
-
-  renderJobs();
-}
-
-function renderJobs() {
-  const company = document.getElementById('companyFilter').value.toLowerCase();
-  const location = document.getElementById('locationFilter').value.toLowerCase();
-  const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-  const experience = document.getElementById('experienceFilter').value.toLowerCase();
-  const workType = document.getElementById('workTypeFilter').value.toLowerCase();
-  const tbody = document.getElementById('jobsTable').querySelector('tbody');
-  tbody.innerHTML = '';
-
-  const filtered = jobsData.filter(job => {
-    const companyText = (job.company || '').toLowerCase();
-    const locationText = (job.location || '').toLowerCase();
-    const titleText = (job.title || '').toLowerCase();
-    const experienceText = (job.experience_level || job.experience || '').toLowerCase();
-    const workTypeText = (job.work_type || '').toLowerCase();
-
-    const matchCompany = !company || companyText === company;
-    const matchLocation = !location || locationText === location;
-    const matchExperience = !experience || experienceText === experience;
-    const matchWorkType = !workType || workTypeText === workType;
-    const matchSearch = !searchTerm || titleText.includes(searchTerm) || companyText.includes(searchTerm) || locationText.includes(searchTerm);
-    return matchCompany && matchLocation && matchExperience && matchWorkType && matchSearch;
-
-  });
-
-  if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#64748b;">No jobs match your search or filters.</td></tr>`;
-    return;
-  }
-
-  filtered.forEach((job, index) => {
-    const tr = document.createElement('tr');
-    tr.style.opacity = 0;
-    tr.innerHTML = `
-      <td>${job.company ?? ''}</td>
-      <td>${job.location ?? ''}</td>
-      <td>${job.title ?? ''}</td>
-      <td><a href="${job.url ?? '#'}" target="_blank">Apply</a></td>
-    `;
-    tbody.appendChild(tr);
-    setTimeout(() => { tr.style.opacity = 1; }, index * 50);
-  });
-}
-
-document.getElementById('companyFilter').addEventListener('change', renderJobs);
-document.getElementById('locationFilter').addEventListener('change', renderJobs);
-document.getElementById('experienceFilter').addEventListener('change', renderJobs);
-document.getElementById('workTypeFilter').addEventListener('change', renderJobs);
-document.getElementById('searchInput').addEventListener('input', renderJobs);
-
-document.getElementById('clearCompany').addEventListener('click', () => {
-  const hidden = document.getElementById('companyFilter');
-  hidden.value = '';
-  hidden.dispatchEvent(new Event('change', { bubbles: true }));
-  const wrapper = document.getElementById('companyCustom');
-  wrapper.querySelector('.custom-select__button').firstChild.nodeValue = 'All Companies ';
-  wrapper.querySelectorAll('[aria-selected="true"]').forEach(n => n.removeAttribute('aria-selected'));
-  wrapper.querySelector('.custom-select__option').setAttribute('aria-selected', 'true');
-});
-
-document.getElementById('clearLocation').addEventListener('click', () => {
-  const hidden = document.getElementById('locationFilter');
-  hidden.value = '';
-  hidden.dispatchEvent(new Event('change', { bubbles: true }));
-  const wrapper = document.getElementById('locationCustom');
-  wrapper.querySelector('.custom-select__button').firstChild.nodeValue = 'All Locations ';
-  wrapper.querySelectorAll('[aria-selected="true"]').forEach(n => n.removeAttribute('aria-selected'));
-  wrapper.querySelector('.custom-select__option').setAttribute('aria-selected', 'true');
-});
-
-document.getElementById('clearExperience').addEventListener('click', () => {
-  const hidden = document.getElementById('experienceFilter');
-  hidden.value = '';
-  hidden.dispatchEvent(new Event('change', { bubbles: true }));
-  const wrapper = document.getElementById('experienceCustom');
-  wrapper.querySelector('.custom-select__button').firstChild.nodeValue = 'All Experience Levels ';
-  wrapper.querySelectorAll('[aria-selected="true"]').forEach(n => n.removeAttribute('aria-selected'));
-  wrapper.querySelector('.custom-select__option').setAttribute('aria-selected', 'true');
-});
-
-document.getElementById('clearWorkType').addEventListener('click', () => {
-  const hidden = document.getElementById('workTypeFilter');
-  hidden.value = '';
-  hidden.dispatchEvent(new Event('change', { bubbles: true }));
-  const wrapper = document.getElementById('workTypeCustom');
-  wrapper.querySelector('.custom-select__button').firstChild.nodeValue = 'All Work Types ';
-  wrapper.querySelectorAll('[aria-selected="true"]').forEach(n => n.removeAttribute('aria-selected'));
-  wrapper.querySelector('.custom-select__option').setAttribute('aria-selected', 'true');
-});
-
-fetchData();
-</script>
+<script src="js/jobs.js"></script>
 </body>
 </html>

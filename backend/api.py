@@ -3,30 +3,51 @@ from flask_cors import CORS
 import sqlite3
 import re
 from pathlib import Path
-
-app = Flask(__name__, 
-            template_folder="templates",
-            static_folder="static", 
-            static_url_path="/static")
-CORS(app)  # Allow cross-origin requests
+import subprocess
+import sys
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
+FRONTEND_DIR = ROOT_DIR / "frontend"
 DB_PATH = ROOT_DIR / "db" / "jobs.db"
 
-# ----------------- Helper Functions -----------------
+
+def ensure_database():
+    """Ensure SQLite DB schema exists using backend/db_init.py."""
+    conn = sqlite3.connect(str(DB_PATH))
+    cur = conn.cursor()
+    cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='applications'")
+    has_apps_table = cur.fetchone() is not None
+    conn.close()
+
+    if not has_apps_table:
+        subprocess.run([sys.executable, str(ROOT_DIR / "backend" / "db_init.py")], check=True)
+
+
+app = Flask(
+    __name__,
+    template_folder=str(FRONTEND_DIR),
+    static_folder=str(FRONTEND_DIR),
+    static_url_path="",
+)
+CORS(app)
+
+
 def normalize_location(loc):
     """Normalize location strings for consistency."""
     if not loc:
         return "Unknown"
-    loc = loc.strip()
-    if "remote" in loc.lower():
+
+    cleaned = loc.strip()
+    if "remote" in cleaned.lower():
         return "Remote"
-    loc = re.sub(r"\s*-\s*", ", ", loc)
-    loc = re.sub(r",\s*,+", ",", loc)
-    loc = loc.strip(", ")
-    return loc
+
+    cleaned = re.sub(r"\s*-\s*", ", ", cleaned)
+    cleaned = re.sub(r",\s*,+", ",", cleaned)
+    return cleaned.strip(", ")
+
 
 def query_db(query, args=()):
+    ensure_database()
     conn = sqlite3.connect(str(DB_PATH))
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
@@ -35,35 +56,33 @@ def query_db(query, args=()):
     conn.close()
     return [dict(row) for row in rows]
 
-# ----------------- API Endpoints -----------------
-@app.route("/jobs")
-def get_jobs():
-    rows = query_db("SELECT company, location, title, url FROM applications ORDER BY id DESC")
-    # Normalize locations on the fly
-    for row in rows:
-        row["location"] = normalize_location(row["location"])
-    return jsonify(rows)
 
-@app.route("/companies")
-def get_companies():
-    rows = query_db("SELECT DISTINCT company FROM applications ORDER BY company")
-    companies = [row["company"] for row in rows]
-    return jsonify(companies)
-
-@app.route("/locations")
-def get_locations():
-    rows = query_db("SELECT DISTINCT location FROM applications")
-    locations = [normalize_location(row["location"]) for row in rows]
-    # Remove duplicates after normalization
-    locations = sorted(list(set(locations)))
-    return jsonify(locations)
-
-# ----------------- Serve Frontend -----------------
 @app.route("/")
 def index():
     return render_template("index.html")
 
-# ----------------- Main -----------------
+
+@app.route("/jobs")
+def get_jobs():
+    rows = query_db("SELECT company, location, title, url FROM applications ORDER BY id DESC")
+    for row in rows:
+        row["location"] = normalize_location(row.get("location"))
+    return jsonify(rows)
+
+
+@app.route("/companies")
+def get_companies():
+    rows = query_db("SELECT DISTINCT company FROM applications WHERE company IS NOT NULL AND company != '' ORDER BY company")
+    return jsonify([row["company"] for row in rows])
+
+
+@app.route("/locations")
+def get_locations():
+    rows = query_db("SELECT DISTINCT location FROM applications")
+    locations = sorted({normalize_location(row.get("location")) for row in rows})
+    return jsonify(locations)
+
+
 if __name__ == "__main__":
-    print("Serving static from:", app.static_folder)
+    print("Serving frontend from:", FRONTEND_DIR)
     app.run(debug=True)
