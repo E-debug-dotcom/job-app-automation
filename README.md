@@ -11,7 +11,7 @@ Runtime path (recommended):
 - **Backend API:** `backend/api.py`
 - **Collector:** `backend/collectors/greenhouse_collector.py`
 - **Database:** `db/jobs.db`
-- **Frontend:** served from `backend/static/`
+- **Frontend:** served from `frontend/` (canonical source used at runtime)
 
 Supporting scripts:
 - `backend/db_init.py` initializes schema and optional sample seed data.
@@ -38,6 +38,8 @@ python3 backend/db_init.py
 
 This creates `db/jobs.db` and only seeds sample rows when tables are empty.
 
+The API also lazily ensures DB schema exists by invoking `backend/db_init.py` if the `applications` table is missing.
+
 ## Collect Greenhouse jobs
 
 Use the provided config file of board handles:
@@ -55,10 +57,15 @@ python3 backend/collectors/greenhouse_collector.py --companies config/companies.
 ## Run the app
 
 ```bash
-python3 backend/api.py
+python3 backend/app.py
 ```
 
 Open: `http://127.0.0.1:5000/`
+
+Runtime behavior notes:
+- API data is read from SQLite (`db/jobs.db`, table `applications`).
+- If schema is missing, the app auto-initializes via `backend/db_init.py`.
+- Frontend is served from `frontend/` when present (fallback to `backend/templates` + `backend/static`).
 
 ## API endpoints
 
@@ -93,12 +100,12 @@ When resolving conflicts in these files, keep the versions that include:
 
 Files commonly affected:
 - `frontend/index.html`
-- `backend/static/index.html`
+- `backend/templates/index.html` (optional copy)
 
 After resolving conflicts:
 
 ```bash
-git add frontend/index.html backend/static/index.html
+git add frontend/index.html backend/templates/index.html
 git commit -m "Resolve UI filter merge conflicts"
 git push
 ```

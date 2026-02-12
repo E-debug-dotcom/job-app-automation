@@ -2,16 +2,36 @@ from flask import Flask, jsonify, render_template
 import sqlite3
 import re
 from pathlib import Path
+import subprocess
+import sys
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+BACKEND_DIR = Path(__file__).resolve().parent
+FRONTEND_DIR = ROOT_DIR / "frontend"
+TEMPLATE_DIR = FRONTEND_DIR if FRONTEND_DIR.exists() else BACKEND_DIR / "templates"
+STATIC_DIR = FRONTEND_DIR if FRONTEND_DIR.exists() else BACKEND_DIR / "static"
+STATIC_URL_PATH = "" if FRONTEND_DIR.exists() else "/static"
+DB_PATH = ROOT_DIR / "db" / "jobs.db"
+
+
+def ensure_database():
+    """Ensure SQLite DB schema exists using backend/db_init.py."""
+    conn = sqlite3.connect(str(DB_PATH))
+    cur = conn.cursor()
+    cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='applications'")
+    has_apps_table = cur.fetchone() is not None
+    conn.close()
+
+    if not has_apps_table:
+        subprocess.run([sys.executable, str(ROOT_DIR / "backend" / "db_init.py")], check=True)
+
 
 app = Flask(
     __name__,
-    template_folder="templates",
-    static_folder="static",
-    static_url_path="/static",
+    template_folder=str(TEMPLATE_DIR),
+    static_folder=str(STATIC_DIR),
+    static_url_path=STATIC_URL_PATH,
 )
-
-ROOT_DIR = Path(__file__).resolve().parent.parent
-DB_PATH = ROOT_DIR / "db" / "jobs.db"
 
 
 def normalize_location(loc):
@@ -29,6 +49,7 @@ def normalize_location(loc):
 
 
 def query_db(query, args=()):
+    ensure_database()
     conn = sqlite3.connect(str(DB_PATH))
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
