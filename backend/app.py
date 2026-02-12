@@ -15,45 +15,7 @@ TEMPLATE_DIR = FRONTEND_DIR if FRONTEND_DIR.exists() else BACKEND_DIR / "templat
 STATIC_DIR = FRONTEND_DIR if FRONTEND_DIR.exists() else BACKEND_DIR / "static"
 STATIC_URL_PATH = "/static"
 DB_PATH = ROOT_DIR / "db" / "jobs.db"
-LEGACY_DB_PATH = BACKEND_DIR / "db" / "jobs.db"
 JOBS_JSON_PATH = ROOT_DIR / "data" / "jobs.json"
-RESOLVED_DB_PATH = None
-
-
-def db_row_count(path):
-    if not path.exists():
-        return -1
-    try:
-        conn = sqlite3.connect(str(path))
-        cur = conn.cursor()
-        cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='applications'")
-        if cur.fetchone() is None:
-            conn.close()
-            return 0
-        cur.execute("SELECT COUNT(*) FROM applications")
-        count = cur.fetchone()[0]
-        conn.close()
-        return count
-    except sqlite3.Error:
-        return -1
-
-
-def resolve_db_path():
-    """Prefer legacy backend/db only when it clearly has more job rows."""
-    primary_count = db_row_count(DB_PATH)
-    legacy_count = db_row_count(LEGACY_DB_PATH)
-
-    if legacy_count > primary_count and legacy_count > 0:
-        return LEGACY_DB_PATH
-
-    return DB_PATH
-
-
-def get_db_path():
-    global RESOLVED_DB_PATH
-    if RESOLVED_DB_PATH is None:
-        RESOLVED_DB_PATH = resolve_db_path()
-    return RESOLVED_DB_PATH
 
 
 def stable_job_hash(record):
@@ -108,9 +70,8 @@ def hydrate_db_from_jobs_json(conn):
 
 def ensure_database():
     """Ensure SQLite DB schema exists using backend/db_init.py."""
-    db_path = get_db_path()
-    db_path.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(str(db_path))
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(str(DB_PATH))
     cur = conn.cursor()
     cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='applications'")
     has_apps_table = cur.fetchone() is not None
