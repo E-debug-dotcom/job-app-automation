@@ -4,6 +4,9 @@ import re
 from pathlib import Path
 import subprocess
 import sys
+import json
+from hashlib import sha256
+from datetime import datetime
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 BACKEND_DIR = Path(__file__).resolve().parent
@@ -12,10 +15,62 @@ TEMPLATE_DIR = FRONTEND_DIR if FRONTEND_DIR.exists() else BACKEND_DIR / "templat
 STATIC_DIR = FRONTEND_DIR if FRONTEND_DIR.exists() else BACKEND_DIR / "static"
 STATIC_URL_PATH = "/static"
 DB_PATH = ROOT_DIR / "db" / "jobs.db"
+JOBS_JSON_PATH = ROOT_DIR / "data" / "jobs.json"
+
+
+def stable_job_hash(record):
+    key = record.get("id") or record.get("url") or f"{record.get('company','')}::{record.get('title','')}::{record.get('location','')}"
+    return sha256(str(key).encode("utf-8")).hexdigest()
+
+
+def hydrate_db_from_jobs_json(conn):
+    """Backfill DB from data/jobs.json when the DB only has seed/empty data."""
+    if not JOBS_JSON_PATH.exists():
+        return
+
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*) FROM applications")
+    row_count = cur.fetchone()[0]
+    if row_count > 1:
+        return
+
+    try:
+        raw_jobs = json.loads(JOBS_JSON_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return
+
+    now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    inserted = 0
+    for job in raw_jobs:
+        if not isinstance(job, dict):
+            continue
+        cur.execute(
+            """
+            INSERT OR IGNORE INTO applications
+            (external_id, company, title, location, url, source, date_posted, date_scraped, job_hash)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                str(job.get("id") or ""),
+                job.get("company") or "",
+                job.get("title") or "",
+                job.get("location") or "",
+                job.get("url") or "",
+                "json_backfill",
+                job.get("date_posted") or "",
+                now,
+                stable_job_hash(job),
+            ),
+        )
+        inserted += cur.rowcount > 0
+
+    if inserted:
+        conn.commit()
 
 
 def ensure_database():
     """Ensure SQLite DB schema exists using backend/db_init.py."""
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(str(DB_PATH))
     cur = conn.cursor()
     cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='applications'")
@@ -52,6 +107,7 @@ def query_db(query, args=()):
     ensure_database()
     conn = sqlite3.connect(str(DB_PATH))
     conn.row_factory = sqlite3.Row
+    hydrate_db_from_jobs_json(conn)
     cur = conn.cursor()
     cur.execute(query, args)
     rows = cur.fetchall()
