@@ -1,7 +1,9 @@
 from flask import Flask, jsonify, render_template
 import json, os
 
-app = Flask(__name__)
+app = Flask(__name__, 
+            template_folder='templates',
+            static_folder='static')
 
 # Get the project root
 root = os.path.dirname(os.path.dirname(__file__))
