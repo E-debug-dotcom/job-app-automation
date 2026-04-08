@@ -38,6 +38,8 @@ def init_db(seed_sample_data=True):
             status TEXT DEFAULT 'pending',
             matched_skills TEXT,
             notes TEXT,
+            score REAL,
+            evaluation_notes TEXT,
             job_hash TEXT UNIQUE
         )
     ''')

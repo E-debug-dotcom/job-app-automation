@@ -262,5 +262,71 @@
   },
   {
     "handle": "fetchrewards"
+  },
+  {
+    "handle": "anthropic"
+  },
+  {
+    "handle": "polyai"
+  },
+  {
+    "handle": "parloa"
+  },
+  {
+    "handle": "intercom"
+  },
+  {
+    "handle": "humeai"
+  },
+  {
+    "handle": "airtable"
+  },
+  {
+    "handle": "vercel"
+  },
+  {
+    "handle": "temporal"
+  },
+  {
+    "handle": "arizeai"
+  },
+  {
+    "handle": "runpod"
+  },
+  {
+    "handle": "gleanwork"
+  },
+  {
+    "handle": "speechmatics"
+  },
+  {
+    "handle": "celonis"
+  },
+  {
+    "handle": "contentful"
+  },
+  {
+    "handle": "getyourguide"
+  },
+  {
+    "handle": "hellofresh"
+  },
+  {
+    "handle": "n26"
+  },
+  {
+    "handle": "traderepublicbank"
+  },
+  {
+    "handle": "sumup"
+  },
+  {
+    "handle": "blackforestlabs"
+  },
+  {
+    "handle": "helsing"
+  },
+  {
+    "handle": "scandit"
   }
 ]

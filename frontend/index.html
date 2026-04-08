@@ -52,6 +52,16 @@
     <ul id="workTypeMenu" class="custom-select__menu" role="listbox"></ul>
   </div>
   <button id="clearWorkType">Clear</button>
+
+  <select id="scoreFilter" class="visually-hidden" aria-hidden="true" tabindex="-1"></select>
+  <div id="scoreCustom" class="custom-select" data-target="scoreFilter">
+    <button type="button" class="custom-select__button" aria-haspopup="listbox" aria-expanded="false" aria-controls="scoreMenu">
+      All Scores
+      <span class="custom-select__chevron">▾</span>
+    </button>
+    <ul id="scoreMenu" class="custom-select__menu" role="listbox"></ul>
+  </div>
+  <button id="clearScore">Clear</button>
 </div>
 
 <div class="table-container">
@@ -61,6 +71,8 @@
         <th>Company</th>
         <th>Location</th>
         <th>Title</th>
+        <th>Score</th>
+        <th>Notes</th>
         <th>Apply</th>
       </tr>
     </thead>

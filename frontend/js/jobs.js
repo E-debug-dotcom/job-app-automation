@@ -97,11 +97,13 @@ async function fetchData() {
 
   const experienceLevels = uniqSorted(jobsData.map(deriveExperience));
   const workTypes = uniqSorted(jobsData.map(deriveWorkType));
+  const scores = ['All', '4+', '3+', '2+', '1+', '0+'];
 
   setupCustomSelect('companyCustom', 'companyFilter', companies, 'All Companies');
   setupCustomSelect('locationCustom', 'locationFilter', locations, 'All Locations');
   setupCustomSelect('experienceCustom', 'experienceFilter', experienceLevels, 'All Experience Levels');
   setupCustomSelect('workTypeCustom', 'workTypeFilter', workTypes, 'All Work Types');
+  setupCustomSelect('scoreCustom', 'scoreFilter', scores, 'All Scores');
 
   renderJobs();
 }
@@ -118,6 +120,7 @@ function renderJobs() {
   const searchTerm = document.getElementById('searchInput').value.toLowerCase();
   const experience = document.getElementById('experienceFilter').value.toLowerCase();
   const workType = document.getElementById('workTypeFilter').value.toLowerCase();
+  const scoreFilter = document.getElementById('scoreFilter').value;
   const tbody = document.querySelector('#jobsTable tbody');
   tbody.innerHTML = '';
 
@@ -137,11 +140,18 @@ function renderJobs() {
       || companyText.includes(searchTerm)
       || locationText.includes(searchTerm);
 
-    return matchCompany && matchLocation && matchExperience && matchWorkType && matchSearch;
+    let matchScore = true;
+    if (scoreFilter && scoreFilter !== 'All') {
+      const minScore = parseFloat(scoreFilter.replace('+', ''));
+      const jobScore = job.score || 0;
+      matchScore = jobScore >= minScore;
+    }
+
+    return matchCompany && matchLocation && matchExperience && matchWorkType && matchSearch && matchScore;
   });
 
   if (filtered.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" id="noResults">No jobs match your search or filters.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" id="noResults">No jobs match your search or filters.</td></tr>';
     return;
   }
 
@@ -152,6 +162,8 @@ function renderJobs() {
       <td>${highlightMatch(job.company ?? '', searchTerm)}</td>
       <td>${highlightMatch(job.location ?? '', searchTerm)}</td>
       <td>${highlightMatch(job.title ?? '', searchTerm)}</td>
+      <td>${job.score ?? 'N/A'}</td>
+      <td>${job.evaluation_notes ?? ''}</td>
       <td><a href="${job.url ?? '#'}" target="_blank">Apply</a></td>
     `;
 
@@ -176,6 +188,7 @@ document.getElementById('companyFilter').addEventListener('change', renderJobs);
 document.getElementById('locationFilter').addEventListener('change', renderJobs);
 document.getElementById('experienceFilter').addEventListener('change', renderJobs);
 document.getElementById('workTypeFilter').addEventListener('change', renderJobs);
+document.getElementById('scoreFilter').addEventListener('change', renderJobs);
 document.getElementById('searchInput').addEventListener('input', renderJobs);
 
 document.getElementById('clearCompany').addEventListener('click', () => {
@@ -192,6 +205,10 @@ document.getElementById('clearExperience').addEventListener('click', () => {
 
 document.getElementById('clearWorkType').addEventListener('click', () => {
   clearCustomSelect('workTypeFilter', 'workTypeCustom', 'All Work Types');
+});
+
+document.getElementById('clearScore').addEventListener('click', () => {
+  clearCustomSelect('scoreFilter', 'scoreCustom', 'All Scores');
 });
 
 // Initialize

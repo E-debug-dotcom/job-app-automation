@@ -89,6 +89,34 @@ python3 backend/app.py
 2. Add tests for DB pathing and API endpoint responses.
 3. Consolidate duplicate frontend copies (`frontend/` and inline static variants) once runtime path is finalized.
 
+## Future Enhancements
+
+Based on review of `https://github.com/santifer/career-ops`, the following features could be implemented to further enhance the repo:
+
+3. Add Tailored CV/PDF Generation
+   - Integrate a PDF library (e.g., `reportlab` or `fpdf`) to generate ATS-optimized CVs customized per job description.
+   - Use AI to tailor CV content based on job requirements.
+   - Add dependencies like `reportlab` to `requirements.txt`.
+
+4. Batch Processing and Parallel Evaluation
+   - Add batch mode to collectors/evaluators for parallel API calls.
+   - Use threading/multiprocessing or tools like `celery` for async processing.
+   - Implement health checks and deduplication improvements.
+
+5. Expand Job Sources (Ashby, Lever, Web Search)
+   - Add collectors for Ashby (`backend/collectors/ashby_collector.py`) and Lever (`backend/collectors/lever_collector.py`).
+   - Implement web search collector using `selenium` or `playwright` for non-API portals.
+   - Add search queries and methods to `config/`.
+
+6. Add Data Integrity and Tracking Features
+   - Extend `backend/merge_jobs.py` for better dedup and status tracking (applied, interviewed).
+   - Add automated merge, dedup, status normalization, and health checks.
+
+7. General Improvements
+   - Adopt a YAML config for flexibility (replace JSON with YAML).
+   - Add unit tests for new modules.
+   - Expand documentation with setup for AI features.
+
 ## Troubleshooting merge conflicts (UI filters)
 
 If you merged a PR but still do not see the search bar/extra filters, your branch may have accepted only one side of a conflict.

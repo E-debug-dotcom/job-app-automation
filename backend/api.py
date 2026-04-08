@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
 import sqlite3
 import re
@@ -8,6 +8,7 @@ import sys
 import json
 from hashlib import sha256
 from datetime import datetime
+from evaluators.job_evaluator import evaluate_job
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 BACKEND_DIR = Path(__file__).resolve().parent
@@ -124,7 +125,7 @@ def index():
 
 @app.route("/jobs")
 def get_jobs():
-    rows = query_db("SELECT company, location, title, url FROM applications ORDER BY id DESC")
+    rows = query_db("SELECT company, location, title, url, score, evaluation_notes FROM applications ORDER BY id DESC")
     for row in rows:
         row["location"] = normalize_location(row.get("location"))
     return jsonify(rows)
@@ -141,6 +142,29 @@ def get_locations():
     rows = query_db("SELECT DISTINCT location FROM applications")
     locations = sorted({normalize_location(row.get("location")) for row in rows})
     return jsonify(locations)
+
+
+@app.route("/evaluate/<int:job_id>", methods=["POST"])
+def evaluate_job_endpoint(job_id):
+    # Get job details
+    rows = query_db("SELECT title, company, location, url FROM applications WHERE id = ?", (job_id,))
+    if not rows:
+        return jsonify({"error": "Job not found"}), 404
+
+    job = rows[0]
+    # For description, perhaps fetch from URL or assume not available; use title as proxy
+    description = job.get("title", "")  # Placeholder
+
+    result = evaluate_job(job["title"], description, job["company"], job["location"])
+
+    # Update DB
+    conn = sqlite3.connect(str(DB_PATH))
+    cur = conn.cursor()
+    cur.execute("UPDATE applications SET score = ?, evaluation_notes = ? WHERE id = ?", (result["score"], result["notes"], job_id))
+    conn.commit()
+    conn.close()
+
+    return jsonify(result)
 
 
 if __name__ == "__main__":
